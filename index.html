@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#1a1a1a">
+  <meta name="theme-color" content="#1D9E75">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Financeiro">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
   <title>Controle Familiar</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/dist/tabler-icons.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,27 +22,28 @@
         <i class="ti ti-wallet" aria-hidden="true"></i>
         <span>Controle Familiar</span>
       </div>
-      <span id="mes-ref" class="mes-badge"></span>
+      <div class="top-bar-right">
+        <span id="mes-ref" class="mes-badge"></span>
+        <button class="sync-btn" onclick="carregarDados(false)" aria-label="Atualizar lançamentos" title="Sincronizar">
+          <i class="ti ti-refresh" aria-hidden="true"></i>
+        </button>
+      </div>
     </header>
 
     <nav class="tab-bar" role="tablist">
       <button class="tab active" role="tab" aria-selected="true" onclick="irPara('lancar',this)">
-        <i class="ti ti-plus" aria-hidden="true"></i>
-        <span>Lançar</span>
+        <i class="ti ti-plus" aria-hidden="true"></i><span>Lançar</span>
       </button>
       <button class="tab" role="tab" aria-selected="false" onclick="irPara('resumo',this)">
-        <i class="ti ti-chart-bar" aria-hidden="true"></i>
-        <span>Resumo</span>
+        <i class="ti ti-chart-bar" aria-hidden="true"></i><span>Resumo</span>
       </button>
       <button class="tab" role="tab" aria-selected="false" onclick="irPara('historico',this)">
-        <i class="ti ti-list" aria-hidden="true"></i>
-        <span>Histórico</span>
+        <i class="ti ti-list" aria-hidden="true"></i><span>Histórico</span>
       </button>
     </nav>
 
     <!-- ABA LANÇAR -->
     <section class="section active" id="sec-lancar" aria-label="Novo lançamento">
-
       <div class="field">
         <label>Tipo</label>
         <div class="tipo-btns" role="group">
@@ -104,7 +104,6 @@
         <i class="ti ti-check" aria-hidden="true"></i>
         Confirmar lançamento
       </button>
-
     </section>
 
     <!-- ABA RESUMO -->
@@ -128,7 +127,6 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
   <script src="app.js"></script>
 </body>
 </html>
