@@ -1,6 +1,6 @@
 // ── Configuração ──────────────────────────────────────────────────────────────
 // Após publicar o Apps Script, cole a URL aqui:
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-BVRrUe8L9V9AC_3RCuCmMFuh_Zs6afaurlcWYjdevWXzd-OWxmy6eOGWQ0detEIJ/exec';
+const SCRIPT_URL = 'COLE_A_URL_DO_APPS_SCRIPT_AQUI';
 
 // ── Categorias ────────────────────────────────────────────────────────────────
 const CATS = {
@@ -74,8 +74,14 @@ async function carregarDados(silencioso) {
   } catch (e) {
     mostrarToast('Erro ao carregar. Verifique a conexão.', 'erro');
   }
+
   renderHistorico();
   renderResumo();
+
+  // Garante que a aba visível no momento reflete os dados novos imediatamente
+  const abaAtiva = document.querySelector('.section.active');
+  if (abaAtiva && abaAtiva.id === 'sec-resumo') renderResumo();
+  if (abaAtiva && abaAtiva.id === 'sec-historico') renderHistorico();
 }
 
 function mostrarSkeleton() {
