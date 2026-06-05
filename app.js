@@ -1,6 +1,6 @@
 // ── Configuração ──────────────────────────────────────────────────────────────
 // Após publicar o Apps Script, cole a URL aqui:
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3yflUOXNVLpvezt_62dvEtO789-UJ7gGXd7ZHuFxo4WC06Jk_bq15r6ExT_niIFW2tw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkjH_5OfbcWZYaVh5dVInKTPFmxJWyiSyfpUsOShgPsJUWfSEjlwEdxUZTdwj83J7G/exec';
 
 // ── Categorias ────────────────────────────────────────────────────────────────
 const CATS = {
