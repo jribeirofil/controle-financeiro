@@ -1,6 +1,6 @@
 // ── Configuração ──────────────────────────────────────────────────────────────
 // Após publicar o Apps Script, cole a URL aqui:
-const SCRIPT_URL = https://script.google.com/macros/s/AKfycby3yflUOXNVLpvezt_62dvEtO789-UJ7gGXd7ZHuFxo4WC06Jk_bq15r6ExT_niIFW2tw/exec;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3yflUOXNVLpvezt_62dvEtO789-UJ7gGXd7ZHuFxo4WC06Jk_bq15r6ExT_niIFW2tw/exec';
 
 // ── Categorias ────────────────────────────────────────────────────────────────
 const CATS = {
@@ -16,10 +16,10 @@ const CATS = {
     'Outros':       ['Presente / Doação', 'Imprevistos', 'Outros'],
   },
   receita: {
-    'Renda':        ['Salário', 'Freelance / Extra', 'Bônus', 'Aluguel Recebido', 'Outros'],
+    'Renda': ['Salário', 'Freelance / Extra', 'Bônus', 'Aluguel Recebido', 'Outros'],
   },
   poupanca: {
-    'Poupança':     ['Reserva de Emergência', 'Investimentos', 'Outros'],
+    'Poupança': ['Reserva de Emergência', 'Investimentos', 'Outros'],
   }
 };
 
@@ -31,11 +31,14 @@ const ICONES = {
 };
 
 // ── Estado ────────────────────────────────────────────────────────────────────
-let tipoAtual  = 'despesa';
-let respAtual  = 'Pessoa 1';
+let tipoAtual   = 'despesa';
+let respAtual   = 'Pessoa 1';
 let filtroAtual = 'todos';
 let lancamentos = [];
-let carregando  = false;
+
+function scriptConfigurado() {
+  return SCRIPT_URL && SCRIPT_URL !== 'COLE_A_URL_DO_APPS_SCRIPT_AQUI';
+}
 
 // ── API Google Sheets ─────────────────────────────────────────────────────────
 async function apiListar() {
@@ -58,33 +61,31 @@ async function apiDeletar(id) {
 }
 
 // ── Carregar lançamentos ──────────────────────────────────────────────────────
-async function carregarDados(silencioso = false) {
-  if (!silencioso) mostrarSkeleton();
+async function carregarDados(silencioso) {
+  if (!scriptConfigurado()) {
+    renderHistorico();
+    renderResumo();
+    return;
+  }
+
+  mostrarSkeleton();
   try {
     lancamentos = await apiListar();
-    esconderSkeleton();
   } catch (e) {
-    esconderSkeleton();
-    mostrarToast('Erro ao carregar dados. Verifique a conexão.', 'erro');
+    mostrarToast('Erro ao carregar. Verifique a conexão.', 'erro');
   }
+  renderHistorico();
+  renderResumo();
 }
 
 function mostrarSkeleton() {
-  carregando = true;
   const lista = document.getElementById('lista');
   if (lista) {
     lista.innerHTML = `
       <div class="skeleton-item"></div>
       <div class="skeleton-item"></div>
-      <div class="skeleton-item"></div>
-    `;
+      <div class="skeleton-item"></div>`;
   }
-}
-
-function esconderSkeleton() {
-  carregando = false;
-  renderHistorico();
-  renderResumo();
 }
 
 // ── Navegação ─────────────────────────────────────────────────────────────────
@@ -153,10 +154,6 @@ async function lancar() {
   if (!valor || valor <= 0) { mostrarToast('Informe o valor', 'erro'); return; }
   if (!cat) { mostrarToast('Selecione a categoria', 'erro'); return; }
 
-  const btnLancar = document.querySelector('.btn-lancar');
-  btnLancar.disabled = true;
-  btnLancar.innerHTML = '<i class="ti ti-loader-2 spin" aria-hidden="true"></i> Salvando...';
-
   const lanc = {
     id: String(Date.now()),
     tipo: tipoAtual, valor, cat, subcat,
@@ -164,15 +161,22 @@ async function lancar() {
     resp: respAtual, data,
   };
 
+  // Sem API: só salva local e mostra
+  if (!scriptConfigurado()) {
+    lancamentos.unshift(lanc);
+    limparFormulario();
+    mostrarToast('Lançamento salvo localmente', 'sucesso');
+    return;
+  }
+
+  const btnLancar = document.querySelector('.btn-lancar');
+  btnLancar.disabled = true;
+  btnLancar.innerHTML = '<i class="ti ti-loader-2 spin" aria-hidden="true"></i> Salvando...';
+
   try {
     await apiAdicionar(lanc);
     lancamentos.unshift(lanc);
-
-    document.getElementById('valor').value = '';
-    document.getElementById('descricao').value = '';
-    document.getElementById('categoria').value = '';
-    document.getElementById('subcategoria').innerHTML = '<option value="">Selecione...</option>';
-
+    limparFormulario();
     mostrarToast('Lançamento salvo!', 'sucesso');
   } catch (e) {
     mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
@@ -182,10 +186,26 @@ async function lancar() {
   }
 }
 
+function limparFormulario() {
+  document.getElementById('valor').value = '';
+  document.getElementById('descricao').value = '';
+  document.getElementById('categoria').value = '';
+  document.getElementById('subcategoria').innerHTML = '<option value="">Selecione...</option>';
+}
+
 // ── Deletar ───────────────────────────────────────────────────────────────────
 async function deletar(id, btn) {
   if (!confirm('Remover este lançamento?')) return;
   btn.disabled = true;
+
+  if (!scriptConfigurado()) {
+    lancamentos = lancamentos.filter(l => l.id !== id);
+    renderHistorico();
+    renderResumo();
+    mostrarToast('Removido', 'sucesso');
+    return;
+  }
+
   try {
     await apiDeletar(id);
     lancamentos = lancamentos.filter(l => l.id !== id);
@@ -200,10 +220,10 @@ async function deletar(id, btn) {
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 let toastTimer = null;
-function mostrarToast(msg, tipo = '') {
+function mostrarToast(msg, tipo) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast show ' + tipo;
+  t.className = 'toast show ' + (tipo || '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
@@ -212,7 +232,6 @@ function mostrarToast(msg, tipo = '') {
 function fmtBRL(v) {
   return Number(v).toLocaleString('pt-BR', { style:'currency', currency:'BRL', minimumFractionDigits:2 });
 }
-
 function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -240,8 +259,7 @@ function renderResumo() {
     <div class="stat-card">
       <div class="stat-label"><i class="ti ti-wallet" aria-hidden="true"></i>Saldo livre</div>
       <div class="stat-val ${saldo>=0?'verde':'vermelho'}">${fmtBRL(saldo)}</div>
-    </div>
-  `;
+    </div>`;
 
   const porCat = {};
   lancamentos.filter(l=>l.tipo==='despesa').forEach(l=>{ porCat[l.cat]=(porCat[l.cat]||0)+Number(l.valor); });
@@ -272,9 +290,9 @@ function renderHistorico() {
   }
 
   lista.innerHTML = filtrados.map(l => {
-    const sinal  = l.tipo==='despesa' ? '–' : '+';
-    const icone  = ICONES[l.cat] || 'ti-circle';
-    let dataFmt  = '';
+    const sinal = l.tipo==='despesa' ? '–' : '+';
+    const icone = ICONES[l.cat] || 'ti-circle';
+    let dataFmt = '';
     if (l.data) {
       try { dataFmt = new Date(l.data+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}); } catch(e){}
     }
@@ -286,7 +304,7 @@ function renderHistorico() {
           <div class="lanc-sub">${escHtml(l.subcat||l.cat)} · ${escHtml(l.resp)}${dataFmt?' · '+dataFmt:''}</div>
         </div>
         <div class="lanc-val ${l.tipo}">${sinal} ${fmtBRL(l.valor)}</div>
-        <button class="btn-del" onclick="deletar('${escHtml(l.id)}',this)" aria-label="Remover lançamento">
+        <button class="btn-del" onclick="deletar('${escHtml(String(l.id))}',this)" aria-label="Remover">
           <i class="ti ti-trash" aria-hidden="true"></i>
         </button>
       </div>`;
@@ -300,10 +318,12 @@ function renderHistorico() {
   document.getElementById('mes-ref').textContent =
     hoje.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
   popularCats();
+  renderResumo();
+  renderHistorico();
 
-  if (SCRIPT_URL === 'COLE_A_URL_DO_APPS_SCRIPT_AQUI') {
+  if (!scriptConfigurado()) {
     mostrarToast('Configure a URL do Apps Script no app.js', 'erro');
-    return;
+  } else {
+    carregarDados();
   }
-  carregarDados();
 })();
