@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Financeiro">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Controle Familiar</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/dist/tabler-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <i class="ti ti-wallet" aria-hidden="true"></i>
+        <span>Controle Familiar</span>
+      </div>
+      <span id="mes-ref" class="mes-badge"></span>
+    </header>
+
+    <nav class="tab-bar" role="tablist">
+      <button class="tab active" role="tab" aria-selected="true" onclick="irPara('lancar',this)">
+        <i class="ti ti-plus" aria-hidden="true"></i>
+        <span>Lançar</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" onclick="irPara('resumo',this)">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i>
+        <span>Resumo</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" onclick="irPara('historico',this)">
+        <i class="ti ti-list" aria-hidden="true"></i>
+        <span>Histórico</span>
+      </button>
+    </nav>
+
+    <!-- ABA LANÇAR -->
+    <section class="section active" id="sec-lancar" aria-label="Novo lançamento">
+
+      <div class="field">
+        <label>Tipo</label>
+        <div class="tipo-btns" role="group">
+          <button class="tipo-btn despesa active" onclick="setTipo('despesa',this)" aria-pressed="true">
+            <i class="ti ti-arrow-up-circle" aria-hidden="true"></i>Despesa
+          </button>
+          <button class="tipo-btn receita" onclick="setTipo('receita',this)" aria-pressed="false">
+            <i class="ti ti-arrow-down-circle" aria-hidden="true"></i>Receita
+          </button>
+          <button class="tipo-btn poupanca" onclick="setTipo('poupanca',this)" aria-pressed="false">
+            <i class="ti ti-piggy-bank" aria-hidden="true"></i>Poupança
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="valor">Valor</label>
+        <div class="valor-wrap">
+          <span class="valor-prefix" aria-hidden="true">R$</span>
+          <input type="number" id="valor" placeholder="0,00" inputmode="decimal" min="0" step="0.01" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" onchange="atualizarSubcat()">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="subcategoria">Subcategoria</label>
+        <select id="subcategoria">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="descricao">Descrição <span class="opcional">(opcional)</span></label>
+        <input type="text" id="descricao" placeholder="Ex: Mercado semana 1" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>Responsável</label>
+        <div class="resp-btns" role="group">
+          <button class="resp-btn active" onclick="setResp('Pessoa 1',this)" aria-pressed="true">Pessoa 1</button>
+          <button class="resp-btn" onclick="setResp('Pessoa 2',this)" aria-pressed="false">Pessoa 2</button>
+          <button class="resp-btn" onclick="setResp('Casal',this)" aria-pressed="false">Casal</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="data">Data</label>
+        <input type="date" id="data">
+      </div>
+
+      <button class="btn-lancar" onclick="lancar()">
+        <i class="ti ti-check" aria-hidden="true"></i>
+        Confirmar lançamento
+      </button>
+
+    </section>
+
+    <!-- ABA RESUMO -->
+    <section class="section" id="sec-resumo" aria-label="Resumo do mês">
+      <div class="resumo-cards" id="cards-resumo"></div>
+      <p class="secao-title">Despesas por categoria</p>
+      <div id="barras-cat"></div>
+    </section>
+
+    <!-- ABA HISTÓRICO -->
+    <section class="section" id="sec-historico" aria-label="Histórico de lançamentos">
+      <div class="filtros">
+        <button class="filtro-btn active" onclick="setFiltro('todos',this)">Todos</button>
+        <button class="filtro-btn" onclick="setFiltro('despesa',this)">Despesas</button>
+        <button class="filtro-btn" onclick="setFiltro('receita',this)">Receitas</button>
+        <button class="filtro-btn" onclick="setFiltro('poupanca',this)">Poupança</button>
+      </div>
+      <div class="lista-lancamentos" id="lista"></div>
+    </section>
+
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
