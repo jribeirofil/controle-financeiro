@@ -129,10 +129,17 @@ body {
 .resp-btn { flex-direction: row; justify-content: center; padding: 11px 6px; }
 .resp-btn.active { background: var(--texto); color: var(--superficie); border-color: var(--texto); }
 
-/* ── Valor ── */
+/* ── Valor ── 
 .valor-wrap { position: relative; }
 .valor-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 500; color: var(--texto-sec); pointer-events: none; }
 .valor-wrap input { padding-left: 70px !important; font-size: 24px; font-weight: 600; height: 58px; letter-spacing: -0.5px; }
+*/
+
+/* ── Valor ── */
+.valor-wrap { display: flex; align-items: center; background: var(--superficie); border: 0.5px solid var(--borda-forte); border-radius: var(--radius-md); height: 58px; padding: 0 14px; }
+.valor-wrap:focus-within { border-color: var(--verde); }
+.valor-prefix { font-size: 13px; font-weight: 500; color: var(--texto-sec); flex-shrink: 0; margin-right: 6px; }
+.valor-wrap input { flex: 1; border: none !important; background: none !important; padding: 0 !important; font-size: 24px; font-weight: 600; height: 100%; letter-spacing: -0.5px; color: var(--texto); outline: none; }
 
 /* ── Botão lançar ── */
 .btn-lancar {
