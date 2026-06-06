@@ -99,17 +99,29 @@ async function sair() {
   fecharConfig();
 }
 
-// Captura o resultado do redirect ao voltar do login Google
-getRedirectResult(auth).catch(e => {
-  if (e.code !== 'auth/no-current-user') {
-    mostrarToast('Erro ao entrar. Tente novamente.', 'erro');
+// Processa o resultado do redirect ao voltar do Google
+async function processarRedirect() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      // Login bem sucedido via redirect, onAuthStateChanged vai cuidar do resto
+      console.log('Redirect login OK:', result.user.email);
+    }
+  } catch(e) {
+    console.error('Redirect error:', e);
+    if (e.code !== 'auth/no-current-user' && e.code !== 'auth/null-user') {
+      mostrarToast('Erro ao entrar. Tente novamente.', 'erro');
+    }
   }
-});
+}
+
+processarRedirect();
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     usuarioAtual = user;
     document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('tela-familia').style.display = 'none';
     await verificarFamilia();
   } else {
     usuarioAtual = null;
