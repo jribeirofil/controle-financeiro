@@ -1,4 +1,4 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlY2uN4ZEH0120S3iDTsIQx0j5ycsFM4SPSUvCB6PwAfoY9o615ecJIt9_KFALpEdy/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4nXNyorJ9lcCKX7nYEwcW4shrI9NeSkumlFGV5HaHuU9JNCc_L17DCjCNoSTLz48/exec';
 
 // ── Membros da família ────────────────────────────────────────────────────────
 const ADULTOS  = ['Jayme', 'Rita'];
