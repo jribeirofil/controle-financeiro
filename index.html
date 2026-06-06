@@ -29,6 +29,24 @@
     </div>
   </div>
 
+  <!-- TELA DE LIMITES -->
+  <div class="tela-limites" id="tela-limites">
+    <div class="limites-card">
+      <div class="limites-header">
+        <h2>Limites por categoria</h2>
+        <button class="btn-fechar-limites" onclick="fecharLimites()">
+          <i class="ti ti-x" aria-hidden="true"></i>
+        </button>
+      </div>
+      <p class="limites-desc">Defina o limite de gasto mensal para cada categoria. Deixe em branco para não ter limite.</p>
+      <div id="limites-lista"></div>
+      <button class="btn-salvar-limites" onclick="salvarTodosLimites()">
+        <i class="ti ti-check" aria-hidden="true"></i>
+        Salvar limites
+      </button>
+    </div>
+  </div>
+
   <div class="app">
 
     <header class="top-bar">
@@ -59,9 +77,7 @@
 
     <!-- ABA LANÇAR -->
     <section class="section active" id="sec-lancar" aria-label="Novo lançamento">
-
       <p class="secao-titulo-lancar" id="lancar-titulo">Novo lançamento</p>
-
       <div class="field">
         <label>Tipo</label>
         <div class="tipo-btns" role="group">
@@ -76,7 +92,6 @@
           </button>
         </div>
       </div>
-
       <div class="field">
         <label for="valor">Valor</label>
         <div class="valor-wrap">
@@ -84,26 +99,22 @@
           <input type="text" id="valor" placeholder="0,00" inputmode="decimal" autocomplete="off">
         </div>
       </div>
-
       <div class="field">
         <label for="categoria">Categoria</label>
         <select id="categoria" onchange="atualizarSubcat()">
           <option value="">Selecione...</option>
         </select>
       </div>
-
       <div class="field">
         <label for="subcategoria">Subcategoria</label>
         <select id="subcategoria">
           <option value="">Selecione...</option>
         </select>
       </div>
-
       <div class="field">
         <label for="descricao">Descrição <span class="opcional">(opcional)</span></label>
         <input type="text" id="descricao" placeholder="Ex: Mercado semana 1" autocomplete="off">
       </div>
-
       <div class="field">
         <label>Para quem</label>
         <div class="paraquem-btns" role="group">
@@ -114,29 +125,37 @@
           <button class="paraquem-btn" data-nome="Lucas" onclick="setParaQuem('Lucas',this)" aria-pressed="false">Lucas</button>
         </div>
       </div>
-
       <div class="field">
         <label for="data">Data</label>
         <input type="date" id="data">
       </div>
-
       <button class="btn-lancar" onclick="lancar()">
         <i class="ti ti-check" aria-hidden="true"></i>
         Confirmar lançamento
       </button>
-
       <button class="btn-cancelar-edicao" id="btn-cancelar-edicao" onclick="fecharEdicao()" style="display:none;">
         <i class="ti ti-x" aria-hidden="true"></i>
         Cancelar edição
       </button>
-
     </section>
 
     <!-- ABA RESUMO -->
     <section class="section" id="sec-resumo" aria-label="Resumo do mês">
+      <div class="resumo-topo">
+        <div class="field field-mes">
+          <select id="resumo-mes-sel" onchange="renderResumo()">
+            <option value="">Todos os meses</option>
+          </select>
+        </div>
+        <button class="btn-limites" onclick="abrirLimites()" title="Configurar limites">
+          <i class="ti ti-adjustments" aria-hidden="true"></i>
+          Limites
+        </button>
+      </div>
       <div class="resumo-cards" id="cards-resumo"></div>
       <p class="secao-title">Despesas por categoria</p>
       <div id="barras-cat"></div>
+      <div id="breakdown-membros"></div>
     </section>
 
     <!-- ABA HISTÓRICO -->

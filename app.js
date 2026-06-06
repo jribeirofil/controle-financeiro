@@ -37,21 +37,56 @@ const ICONES = {
 let tipoAtual     = 'despesa';
 let paraQuemAtual = 'Família';
 let filtroAtual   = 'todos';
-let filtroMes     = '';  // 'YYYY-MM' ou '' para todos
+let filtroMes     = '';
 let lancamentos   = [];
-let editandoId    = null;  // ID do lançamento em edição
+let editandoId    = null;
+
+// ── Limites por categoria (localStorage) ─────────────────────────────────────
+function getLimites() {
+  try { return JSON.parse(localStorage.getItem('limites_cat') || '{}'); } catch(e) { return {}; }
+}
+function salvarLimites(limites) {
+  localStorage.setItem('limites_cat', JSON.stringify(limites));
+}
+
+// ── Mês do resumo ─────────────────────────────────────────────────────────────
+function getMesResumo() {
+  const el = document.getElementById('resumo-mes-sel');
+  return el ? el.value : '';
+}
+
+function popularSeletorMesResumo() {
+  const sel = document.getElementById('resumo-mes-sel');
+  if (!sel) return;
+  const meses = {};
+  lancamentos.forEach(l => {
+    if (l.data) {
+      const m = String(l.data).substring(0,7);
+      if (m) meses[m] = true;
+    }
+  });
+  const atual = sel.value;
+  sel.innerHTML = '<option value="">Todos os meses</option>';
+  Object.keys(meses).sort().reverse().forEach(m => {
+    const [ano, mes] = m.split('-');
+    const label = new Date(ano, mes-1, 1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    sel.innerHTML += `<option value="${m}">${label}</option>`;
+  });
+  if (atual) sel.value = atual;
+  else {
+    // Seleciona o mês atual por padrão se existir
+    const hoje = new Date().toISOString().substring(0,7);
+    if (meses[hoje]) sel.value = hoje;
+  }
+}
 
 function scriptConfigurado() {
   return SCRIPT_URL && SCRIPT_URL !== 'COLE_A_URL_DO_APPS_SCRIPT_AQUI';
 }
 
-// ── Perfil do dispositivo ─────────────────────────────────────────────────────
-function getPerfil() {
-  return localStorage.getItem('perfil_usuario');
-}
-function setPerfil(nome) {
-  localStorage.setItem('perfil_usuario', nome);
-}
+// ── Perfil ────────────────────────────────────────────────────────────────────
+function getPerfil() { return localStorage.getItem('perfil_usuario'); }
+function setPerfil(nome) { localStorage.setItem('perfil_usuario', nome); }
 function escolherPerfil(nome) {
   setPerfil(nome);
   document.getElementById('tela-perfil').classList.remove('active');
@@ -64,7 +99,47 @@ function trocarPerfil() {
   document.getElementById('tela-perfil').classList.add('active');
 }
 
-// ── API Google Sheets ─────────────────────────────────────────────────────────
+// ── Tela de limites ───────────────────────────────────────────────────────────
+function abrirLimites() {
+  const limites = getLimites();
+  const cats = Object.keys(CATS.despesa);
+  const lista = document.getElementById('limites-lista');
+  lista.innerHTML = cats.map(cat => `
+    <div class="limite-item">
+      <label class="limite-label">
+        <i class="ti ${ICONES[cat] || 'ti-circle'}" aria-hidden="true"></i>
+        ${cat}
+      </label>
+      <div class="limite-input-wrap">
+        <span class="limite-prefix">R$</span>
+        <input type="text" inputmode="decimal" class="limite-input"
+          data-cat="${cat}"
+          value="${limites[cat] ? String(limites[cat]).replace('.',',') : ''}"
+          placeholder="Sem limite">
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('tela-limites').classList.add('active');
+}
+
+function fecharLimites() {
+  document.getElementById('tela-limites').classList.remove('active');
+}
+
+function salvarTodosLimites() {
+  const limites = {};
+  document.querySelectorAll('.limite-input').forEach(inp => {
+    const cat = inp.dataset.cat;
+    const val = parseFloat(inp.value.replace(',','.'));
+    if (val && val > 0) limites[cat] = val;
+  });
+  salvarLimites(limites);
+  fecharLimites();
+  renderResumo();
+  mostrarToast('Limites salvos!', 'sucesso');
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
 async function apiListar() {
   const res = await fetch(`${SCRIPT_URL}?action=listar`);
   const json = await res.json();
@@ -89,34 +164,25 @@ async function apiDeletar(id) {
   return res.json();
 }
 
-// ── Carregar lançamentos ──────────────────────────────────────────────────────
+// ── Carregar ──────────────────────────────────────────────────────────────────
 async function carregarDados(silencioso) {
-  if (!scriptConfigurado()) {
-    renderHistorico();
-    renderResumo();
-    return;
-  }
+  if (!scriptConfigurado()) { renderHistorico(); renderResumo(); return; }
   mostrarSkeleton();
-  try {
-    lancamentos = await apiListar();
-  } catch (e) {
-    mostrarToast('Erro ao carregar. Verifique a conexão.', 'erro');
-  }
+  try { lancamentos = await apiListar(); }
+  catch (e) { mostrarToast('Erro ao carregar. Verifique a conexão.', 'erro'); }
   renderHistorico();
   renderResumo();
-  const abaAtiva = document.querySelector('.section.active');
-  if (abaAtiva && abaAtiva.id === 'sec-resumo')    renderResumo();
-  if (abaAtiva && abaAtiva.id === 'sec-historico') renderHistorico();
+  const aba = document.querySelector('.section.active');
+  if (aba && aba.id === 'sec-resumo')    renderResumo();
+  if (aba && aba.id === 'sec-historico') renderHistorico();
 }
 
 function mostrarSkeleton() {
   const lista = document.getElementById('lista');
-  if (lista) {
-    lista.innerHTML = `
-      <div class="skeleton-item"></div>
-      <div class="skeleton-item"></div>
-      <div class="skeleton-item"></div>`;
-  }
+  if (lista) lista.innerHTML = `
+    <div class="skeleton-item"></div>
+    <div class="skeleton-item"></div>
+    <div class="skeleton-item"></div>`;
 }
 
 // ── Navegação ─────────────────────────────────────────────────────────────────
@@ -130,55 +196,27 @@ function irPara(id, btn) {
   if (id === 'historico') renderHistorico();
 }
 
-// ── Tipo ──────────────────────────────────────────────────────────────────────
+// ── Tipo / Para quem / Filtros ────────────────────────────────────────────────
 function setTipo(tipo, btn) {
   tipoAtual = tipo;
   document.querySelectorAll('.tipo-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
-  btn.classList.add('active');
-  btn.setAttribute('aria-pressed','true');
+  btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
   popularCats();
 }
-
-// ── Para quem ─────────────────────────────────────────────────────────────────
 function setParaQuem(nome, btn) {
   paraQuemAtual = nome;
   document.querySelectorAll('.paraquem-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
-  btn.classList.add('active');
-  btn.setAttribute('aria-pressed','true');
+  btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
 }
-
-// ── Filtro tipo ───────────────────────────────────────────────────────────────
 function setFiltro(filtro, btn) {
   filtroAtual = filtro;
   document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderHistorico();
 }
-
-// ── Filtro mês ────────────────────────────────────────────────────────────────
 function setFiltroMes(val) {
   filtroMes = val;
   renderHistorico();
-}
-
-function popularFiltroMes() {
-  const meses = {};
-  lancamentos.forEach(l => {
-    if (l.data) {
-      const m = String(l.data).substring(0, 7);
-      if (m) meses[m] = true;
-    }
-  });
-  const sel = document.getElementById('filtro-mes');
-  if (!sel) return;
-  const atual = sel.value;
-  sel.innerHTML = '<option value="">Todos os meses</option>';
-  Object.keys(meses).sort().reverse().forEach(m => {
-    const [ano, mes] = m.split('-');
-    const label = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-    sel.innerHTML += `<option value="${m}">${label}</option>`;
-  });
-  if (atual) sel.value = atual;
 }
 
 // ── Categorias ────────────────────────────────────────────────────────────────
@@ -190,26 +228,40 @@ function popularCats() {
   });
   document.getElementById('subcategoria').innerHTML = '<option value="">Selecione...</option>';
 }
-
 function atualizarSubcat() {
   const cat = document.getElementById('categoria').value;
   const sel = document.getElementById('subcategoria');
   sel.innerHTML = '<option value="">Selecione...</option>';
   if (cat && CATS[tipoAtual][cat]) {
-    CATS[tipoAtual][cat].forEach(s => {
-      sel.innerHTML += `<option value="${s}">${s}</option>`;
-    });
+    CATS[tipoAtual][cat].forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`);
   }
 }
 
-// ── Lançar / Salvar edição ────────────────────────────────────────────────────
+function popularFiltroMes() {
+  const meses = {};
+  lancamentos.forEach(l => {
+    if (l.data) { const m = String(l.data).substring(0,7); if (m) meses[m] = true; }
+  });
+  const sel = document.getElementById('filtro-mes');
+  if (!sel) return;
+  const atual = sel.value;
+  sel.innerHTML = '<option value="">Todos os meses</option>';
+  Object.keys(meses).sort().reverse().forEach(m => {
+    const [ano, mes] = m.split('-');
+    const label = new Date(ano, mes-1, 1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    sel.innerHTML += `<option value="${m}">${label}</option>`;
+  });
+  if (atual) sel.value = atual;
+}
+
+// ── Lançar / Editar ───────────────────────────────────────────────────────────
 async function lancar() {
-  const valorRaw = document.getElementById('valor').value.replace(',', '.');
-  const valor    = parseFloat(valorRaw);
-  const cat      = document.getElementById('categoria').value;
-  const subcat   = document.getElementById('subcategoria').value;
-  const desc     = document.getElementById('descricao').value.trim();
-  const data     = document.getElementById('data').value;
+  const valorRaw      = document.getElementById('valor').value.replace(',','.');
+  const valor         = parseFloat(valorRaw);
+  const cat           = document.getElementById('categoria').value;
+  const subcat        = document.getElementById('subcategoria').value;
+  const desc          = document.getElementById('descricao').value.trim();
+  const data          = document.getElementById('data').value;
   const registradoPor = getPerfil() || 'Não identificado';
 
   if (!valor || valor <= 0) { mostrarToast('Informe o valor', 'erro'); return; }
@@ -217,64 +269,56 @@ async function lancar() {
 
   const btnLancar = document.querySelector('.btn-lancar');
   btnLancar.disabled = true;
+  btnLancar.innerHTML = '<i class="ti ti-loader-2 spin" aria-hidden="true"></i> Salvando...';
 
-  // Modo edição
-  if (editandoId) {
-    const lanc = {
-      id: editandoId,
-      tipo: tipoAtual, valor, cat, subcat,
-      desc: desc || (subcat || cat),
-      paraQuem: paraQuemAtual,
-      registradoPor,
-      data,
-    };
-    btnLancar.innerHTML = '<i class="ti ti-loader-2 spin" aria-hidden="true"></i> Salvando...';
-    try {
+  const lanc = {
+    id: editandoId || String(Date.now()),
+    tipo: tipoAtual, valor, cat, subcat,
+    desc: desc || (subcat || cat),
+    paraQuem: paraQuemAtual, registradoPor, data,
+  };
+
+  try {
+    if (editandoId) {
       if (scriptConfigurado()) await apiAtualizar(lanc);
       const idx = lancamentos.findIndex(l => l.id === editandoId);
       if (idx !== -1) lancamentos[idx] = lanc;
       fecharEdicao();
       mostrarToast('Lançamento atualizado!', 'sucesso');
-      renderHistorico();
-      renderResumo();
-    } catch (e) {
-      mostrarToast('Erro ao atualizar. Tente novamente.', 'erro');
-    } finally {
-      btnLancar.disabled = false;
-      btnLancar.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Confirmar lançamento';
+    } else {
+      if (scriptConfigurado()) await apiAdicionar(lanc);
+      else lancamentos.unshift(lanc);
+      if (scriptConfigurado()) lancamentos.unshift(lanc);
+      limparFormulario();
+      mostrarToast('Lançamento salvo!', 'sucesso');
+
+      // Alerta de limite após novo lançamento
+      verificarAlerteLimite(cat, data);
     }
-    return;
-  }
-
-  // Modo novo lançamento
-  const lanc = {
-    id: String(Date.now()),
-    tipo: tipoAtual, valor, cat, subcat,
-    desc: desc || (subcat || cat),
-    paraQuem: paraQuemAtual,
-    registradoPor,
-    data,
-  };
-
-  if (!scriptConfigurado()) {
-    lancamentos.unshift(lanc);
-    limparFormulario();
-    mostrarToast('Lançamento salvo localmente', 'sucesso');
-    btnLancar.disabled = false;
-    return;
-  }
-
-  btnLancar.innerHTML = '<i class="ti ti-loader-2 spin" aria-hidden="true"></i> Salvando...';
-  try {
-    await apiAdicionar(lanc);
-    lancamentos.unshift(lanc);
-    limparFormulario();
-    mostrarToast('Lançamento salvo!', 'sucesso');
+    renderHistorico();
+    renderResumo();
   } catch (e) {
     mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
   } finally {
     btnLancar.disabled = false;
-    btnLancar.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Confirmar lançamento';
+    btnLancar.innerHTML = editandoId
+      ? '<i class="ti ti-check" aria-hidden="true"></i> Salvar alterações'
+      : '<i class="ti ti-check" aria-hidden="true"></i> Confirmar lançamento';
+  }
+}
+
+function verificarAlerteLimite(cat, data) {
+  const limites = getLimites();
+  if (!limites[cat]) return;
+  const mes = data ? String(data).substring(0,7) : new Date().toISOString().substring(0,7);
+  const gasto = lancamentos
+    .filter(l => l.tipo==='despesa' && l.cat===cat && l.data && String(l.data).substring(0,7)===mes)
+    .reduce((s,l) => s+Number(l.valor), 0);
+  const pct = gasto / limites[cat];
+  if (pct >= 1) {
+    setTimeout(() => mostrarToast(`⚠️ Limite de ${cat} ultrapassado!`, 'erro'), 2600);
+  } else if (pct >= 0.8) {
+    setTimeout(() => mostrarToast(`⚠️ ${cat} em ${Math.round(pct*100)}% do limite`, 'erro'), 2600);
   }
 }
 
@@ -288,74 +332,46 @@ function limparFormulario() {
     b.classList.remove('active');
     if (b.dataset.nome === 'Família') b.classList.add('active');
   });
-  const hoje = new Date();
-  document.getElementById('data').value = hoje.toISOString().split('T')[0];
+  document.getElementById('data').value = new Date().toISOString().split('T')[0];
 }
 
-// ── Editar ────────────────────────────────────────────────────────────────────
 function abrirEdicao(id) {
   const l = lancamentos.find(l => l.id === id);
   if (!l) return;
-
   editandoId = id;
-
-  // Muda título e botão
   document.getElementById('lancar-titulo').textContent = 'Editar lançamento';
   const btn = document.querySelector('.btn-lancar');
   btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Salvar alterações';
   document.getElementById('btn-cancelar-edicao').style.display = 'flex';
-
-  // Preenche tipo
   setTipoSilencioso(l.tipo);
-
-  // Preenche valor
-  document.getElementById('valor').value = String(l.valor).replace('.', ',');
-
-  // Preenche categoria e subcategoria
+  document.getElementById('valor').value = String(l.valor).replace('.',',');
   popularCats();
-  const selCat = document.getElementById('categoria');
-  selCat.value = l.cat;
+  document.getElementById('categoria').value = l.cat;
   atualizarSubcat();
   document.getElementById('subcategoria').value = l.subcat || '';
-
-  // Preenche descrição
   document.getElementById('descricao').value = l.desc || '';
-
-  // Preenche para quem
   paraQuemAtual = l.paraQuem || 'Família';
   document.querySelectorAll('.paraquem-btn').forEach(b => {
     b.classList.remove('active');
     if (b.dataset.nome === paraQuemAtual) b.classList.add('active');
   });
-
-  // Preenche data
   document.getElementById('data').value = l.data || '';
-
-  // Navega para aba lançar
-  const tabLancar = document.querySelector('.tab[aria-controls="sec-lancar"], .tab:first-child');
   irPara('lancar', document.querySelectorAll('.tab')[0]);
-
-  // Scroll para o topo
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setTipoSilencioso(tipo) {
   tipoAtual = tipo;
   document.querySelectorAll('.tipo-btn').forEach(b => {
-    b.classList.remove('active');
-    b.setAttribute('aria-pressed', 'false');
-    if (b.classList.contains(tipo)) {
-      b.classList.add('active');
-      b.setAttribute('aria-pressed', 'true');
-    }
+    b.classList.remove('active'); b.setAttribute('aria-pressed','false');
+    if (b.classList.contains(tipo)) { b.classList.add('active'); b.setAttribute('aria-pressed','true'); }
   });
 }
 
 function fecharEdicao() {
   editandoId = null;
   document.getElementById('lancar-titulo').textContent = 'Novo lançamento';
-  const btn = document.querySelector('.btn-lancar');
-  btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Confirmar lançamento';
+  document.querySelector('.btn-lancar').innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Confirmar lançamento';
   document.getElementById('btn-cancelar-edicao').style.display = 'none';
   limparFormulario();
   setTipoSilencioso('despesa');
@@ -365,20 +381,10 @@ function fecharEdicao() {
 async function deletar(id, btn) {
   if (!confirm('Remover este lançamento?')) return;
   btn.disabled = true;
-
-  if (!scriptConfigurado()) {
-    lancamentos = lancamentos.filter(l => l.id !== id);
-    renderHistorico();
-    renderResumo();
-    mostrarToast('Removido', 'sucesso');
-    return;
-  }
-
   try {
-    await apiDeletar(id);
+    if (scriptConfigurado()) await apiDeletar(id);
     lancamentos = lancamentos.filter(l => l.id !== id);
-    renderHistorico();
-    renderResumo();
+    renderHistorico(); renderResumo();
     mostrarToast('Removido', 'sucesso');
   } catch (e) {
     mostrarToast('Erro ao remover', 'erro');
@@ -393,31 +399,34 @@ function mostrarToast(msg, tipo) {
   t.textContent = msg;
   t.className = 'toast show ' + (tipo || '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 // ── Formatação ────────────────────────────────────────────────────────────────
 function fmtBRL(v) {
-  return Number(v).toLocaleString('pt-BR', { style:'currency', currency:'BRL', minimumFractionDigits:2 });
+  return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2});
 }
 function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function parseFmtData(dataStr) {
   try {
-    const partes = String(dataStr).substring(0,10).split('-');
-    if (partes.length === 3) {
-      return new Date(partes[0], partes[1]-1, partes[2]).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-    }
+    const p = String(dataStr).substring(0,10).split('-');
+    if (p.length===3) return new Date(p[0],p[1]-1,p[2]).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
   } catch(e){}
   return '';
 }
 
 // ── Resumo ────────────────────────────────────────────────────────────────────
 function renderResumo() {
-  const totalReceita  = lancamentos.filter(l=>l.tipo==='receita').reduce((s,l)=>s+Number(l.valor),0);
-  const totalDespesa  = lancamentos.filter(l=>l.tipo==='despesa').reduce((s,l)=>s+Number(l.valor),0);
-  const totalPoupanca = lancamentos.filter(l=>l.tipo==='poupanca').reduce((s,l)=>s+Number(l.valor),0);
+  popularSeletorMesResumo();
+  const mes = getMesResumo();
+
+  const filtrar = arr => mes ? arr.filter(l => l.data && String(l.data).substring(0,7) === mes) : arr;
+
+  const totalReceita  = filtrar(lancamentos.filter(l=>l.tipo==='receita')).reduce((s,l)=>s+Number(l.valor),0);
+  const totalDespesa  = filtrar(lancamentos.filter(l=>l.tipo==='despesa')).reduce((s,l)=>s+Number(l.valor),0);
+  const totalPoupanca = filtrar(lancamentos.filter(l=>l.tipo==='poupanca')).reduce((s,l)=>s+Number(l.valor),0);
   const saldo = totalReceita - totalDespesa - totalPoupanca;
 
   document.getElementById('cards-resumo').innerHTML = `
@@ -438,18 +447,59 @@ function renderResumo() {
       <div class="stat-val ${saldo>=0?'verde':'vermelho'}">${fmtBRL(saldo)}</div>
     </div>`;
 
+  // Breakdown por membro
+  const porMembro = {};
+  filtrar(lancamentos.filter(l=>l.tipo==='despesa')).forEach(l => {
+    const m = l.paraQuem || 'Família';
+    porMembro[m] = (porMembro[m] || 0) + Number(l.valor);
+  });
+  const sortedMembros = Object.entries(porMembro).sort((a,b)=>b[1]-a[1]);
+  const maxMembro = sortedMembros.length ? sortedMembros[0][1] : 1;
+
+  document.getElementById('breakdown-membros').innerHTML = !sortedMembros.length
+    ? ''
+    : `<p class="secao-title" style="margin-top:1.5rem">Gastos por membro</p>` +
+      sortedMembros.map(([m, val]) => {
+        const pct = Math.round((val/maxMembro)*100);
+        return `<div class="barra-wrap">
+          <div class="barra-label"><span>${escHtml(m)}</span><span>${fmtBRL(val)}</span></div>
+          <div class="barra-bg"><div class="barra-fill ok" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('');
+
+  // Barras por categoria com limites
+  const limites = getLimites();
   const porCat = {};
-  lancamentos.filter(l=>l.tipo==='despesa').forEach(l=>{ porCat[l.cat]=(porCat[l.cat]||0)+Number(l.valor); });
+  filtrar(lancamentos.filter(l=>l.tipo==='despesa')).forEach(l => {
+    porCat[l.cat] = (porCat[l.cat]||0) + Number(l.valor);
+  });
   const sorted = Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
   const maxVal = sorted.length ? sorted[0][1] : 1;
 
   document.getElementById('barras-cat').innerHTML = !sorted.length
     ? '<div class="empty-state"><i class="ti ti-chart-bar" aria-hidden="true"></i>Nenhuma despesa ainda</div>'
-    : sorted.map(([cat,val]) => {
-        const pct = Math.round((val/maxVal)*100);
+    : sorted.map(([cat, val]) => {
+        const limite = limites[cat];
+        let pct, classe, labelLimite = '';
+
+        if (limite) {
+          pct = Math.min(Math.round((val/limite)*100), 100);
+          classe = pct >= 100 ? 'alerta' : pct >= 80 ? 'aviso' : 'ok';
+          labelLimite = `<span class="limite-pct ${classe}">${pct}%</span>`;
+        } else {
+          pct = Math.round((val/maxVal)*100);
+          classe = 'ok';
+        }
+
         return `<div class="barra-wrap">
-          <div class="barra-label"><span>${escHtml(cat)}</span><span>${fmtBRL(val)}</span></div>
-          <div class="barra-bg"><div class="barra-fill ${pct>80?'alerta':'ok'}" style="width:${pct}%"></div></div>
+          <div class="barra-label">
+            <span>${escHtml(cat)}</span>
+            <span class="barra-valores">
+              ${fmtBRL(val)}${limite ? ' <span class="limite-ref">/ '+fmtBRL(limite)+'</span>' : ''}
+              ${labelLimite}
+            </span>
+          </div>
+          <div class="barra-bg"><div class="barra-fill ${classe}" style="width:${pct}%"></div></div>
         </div>`;
       }).join('');
 }
@@ -458,15 +508,10 @@ function renderResumo() {
 function renderHistorico() {
   const lista = document.getElementById('lista');
   if (!lista) return;
-
   popularFiltroMes();
 
   let filtrados = filtroAtual==='todos' ? [...lancamentos] : lancamentos.filter(l=>l.tipo===filtroAtual);
-
-  // Filtro de mês
-  if (filtroMes) {
-    filtrados = filtrados.filter(l => l.data && String(l.data).substring(0,7) === filtroMes);
-  }
+  if (filtroMes) filtrados = filtrados.filter(l => l.data && String(l.data).substring(0,7)===filtroMes);
 
   if (!filtrados.length) {
     lista.innerHTML = '<div class="empty-state"><i class="ti ti-inbox" aria-hidden="true"></i>Nenhum lançamento encontrado</div>';
@@ -505,15 +550,11 @@ function renderHistorico() {
     hoje.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
 
   const perfil = getPerfil();
-  if (perfil) {
-    document.getElementById('perfil-badge').textContent = perfil;
-  } else {
-    document.getElementById('tela-perfil').classList.add('active');
-  }
+  if (perfil) document.getElementById('perfil-badge').textContent = perfil;
+  else document.getElementById('tela-perfil').classList.add('active');
 
   popularCats();
   renderResumo();
   renderHistorico();
-
   if (scriptConfigurado()) carregarDados();
 })();

@@ -327,3 +327,81 @@ body {
 .historico-filtros { margin-bottom: 1rem; }
 .field-mes { margin-bottom: 0.75rem; }
 .field-mes select { font-size: 14px; padding: 8px 36px 8px 12px; }
+
+/* ── Tela de limites ── */
+.tela-limites {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6);
+  align-items: flex-end; justify-content: center; padding: 0;
+}
+.tela-limites.active { display: flex; }
+.limites-card {
+  background: var(--superficie); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem 1.25rem; width: 100%; max-width: 480px;
+  max-height: 85dvh; overflow-y: auto;
+}
+.limites-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.limites-header h2 { font-size: 17px; font-weight: 600; }
+.btn-fechar-limites {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: var(--fundo); color: var(--texto-sec);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+}
+.limites-desc { font-size: 13px; color: var(--texto-sec); margin-bottom: 1.25rem; }
+.limite-item {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 0;
+  border-bottom: 0.5px solid var(--borda);
+}
+.limite-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--texto); flex: 1;
+}
+.limite-label i { font-size: 18px; color: var(--texto-sec); }
+.limite-input-wrap { display: flex; align-items: center; gap: 4px; }
+.limite-prefix { font-size: 13px; color: var(--texto-sec); }
+.limite-input {
+  width: 90px; font-family: var(--fonte); font-size: 14px;
+  color: var(--texto); background: var(--fundo);
+  border: 0.5px solid var(--borda-forte); border-radius: var(--radius-sm);
+  padding: 7px 10px; text-align: right;
+}
+.limite-input:focus { outline: none; border-color: var(--verde); }
+.btn-salvar-limites {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 14px; background: var(--verde); color: #fff;
+  border: none; border-radius: var(--radius-lg); font-family: var(--fonte);
+  font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1.25rem;
+}
+
+/* ── Topo do resumo ── */
+.resumo-topo {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+}
+.resumo-topo .field-mes { flex: 1; margin-bottom: 0; }
+.btn-limites {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: var(--radius-md);
+  border: 0.5px solid var(--borda-forte); background: var(--superficie);
+  color: var(--texto-sec); font-family: var(--fonte);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+}
+.btn-limites:hover { border-color: var(--verde); color: var(--verde); }
+.btn-limites i { font-size: 16px; }
+
+/* ── Barras com limite ── */
+.barra-valores { display: flex; align-items: center; gap: 6px; }
+.limite-ref { color: var(--texto-sec); font-size: 12px; }
+.limite-pct {
+  font-size: 11px; font-weight: 600; padding: 2px 6px;
+  border-radius: 99px;
+}
+.limite-pct.ok     { background: var(--verde-claro); color: var(--verde-texto); }
+.limite-pct.aviso  { background: var(--amar-claro, #FFF3CD); color: #7A5C00; }
+.limite-pct.alerta { background: var(--verm-claro);  color: var(--verm-texto);  }
+.barra-fill.aviso  { background: #F0A500; }
