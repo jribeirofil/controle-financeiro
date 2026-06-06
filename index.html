@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#1D9E75">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Financeiro">
+  <meta name="apple-mobile-web-app-title" content="ControleDin">
   <link rel="manifest" href="manifest.json">
-  <title>Controle Familiar</title>
+  <title>ControleDin</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/dist/tabler-icons.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,86 +16,189 @@
 </head>
 <body>
 
-  <!-- TELA DE PERFIL -->
-  <div class="tela-perfil" id="tela-perfil">
-    <div class="perfil-card">
-      <i class="ti ti-users" aria-hidden="true"></i>
-      <h2>Quem é você?</h2>
-      <p>Escolha seu nome para identificar seus lançamentos</p>
-      <div class="perfil-opcoes">
-        <button class="perfil-btn" onclick="escolherPerfil('Jayme')">Jayme</button>
-        <button class="perfil-btn" onclick="escolherPerfil('Rita')">Rita</button>
+  <!-- TELA DE LOGIN -->
+  <div class="tela-login" id="tela-login">
+    <div class="login-card">
+      <div class="login-logo">
+        <i class="ti ti-wallet"></i>
       </div>
+      <h1 class="login-titulo">ControleDin</h1>
+      <p class="login-sub">Gestão financeira familiar</p>
+      <button class="btn-google" id="btn-google" onclick="loginGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Entrar com Google
+      </button>
+      <p class="login-rodape">Seus dados ficam salvos na sua conta com segurança</p>
     </div>
   </div>
 
-  <!-- TELA DE LIMITES -->
-  <div class="tela-limites" id="tela-limites">
-    <div class="limites-card">
-      <div class="limites-header">
-        <h2>Limites por categoria</h2>
-        <button class="btn-fechar-limites" onclick="fecharLimites()">
-          <i class="ti ti-x" aria-hidden="true"></i>
+  <!-- TELA DE FAMÍLIA (primeiro acesso) -->
+  <div class="tela-familia" id="tela-familia">
+    <div class="familia-card">
+      <i class="ti ti-home-heart"></i>
+      <h2>Configure sua família</h2>
+      <p>Crie um grupo familiar ou entre em um existente</p>
+      <div class="familia-opcoes">
+        <button class="familia-btn principal" onclick="mostrarCriarFamilia()">
+          <i class="ti ti-plus"></i>
+          Criar nova família
+        </button>
+        <button class="familia-btn" onclick="mostrarEntrarFamilia()">
+          <i class="ti ti-link"></i>
+          Entrar com código
         </button>
       </div>
-      <p class="limites-desc">Defina o limite de gasto mensal para cada categoria. Deixe em branco para não ter limite.</p>
-      <div id="limites-lista"></div>
-      <button class="btn-salvar-limites" onclick="salvarTodosLimites()">
-        <i class="ti ti-check" aria-hidden="true"></i>
-        Salvar limites
-      </button>
+      <div id="criar-familia-form" style="display:none">
+        <div class="field" style="margin-top:1rem">
+          <label for="nome-familia">Nome da família</label>
+          <input type="text" id="nome-familia" placeholder="Ex: Família Ribeiro">
+        </div>
+        <div class="field">
+          <label for="nome-adulto">Seu nome</label>
+          <input type="text" id="nome-adulto" placeholder="Ex: Jayme">
+        </div>
+        <button class="btn-lancar" onclick="criarFamilia()" style="margin-top:0.5rem">
+          <i class="ti ti-check"></i> Criar família
+        </button>
+      </div>
+      <div id="entrar-familia-form" style="display:none">
+        <div class="field" style="margin-top:1rem">
+          <label for="codigo-familia">Código da família</label>
+          <input type="text" id="codigo-familia" placeholder="Cole o código aqui">
+        </div>
+        <div class="field">
+          <label for="nome-membro">Seu nome</label>
+          <input type="text" id="nome-membro" placeholder="Ex: Rita">
+        </div>
+        <button class="btn-lancar" onclick="entrarFamilia()" style="margin-top:0.5rem">
+          <i class="ti ti-login"></i> Entrar na família
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="app">
+  <!-- TELA DE CONFIGURAÇÕES -->
+  <div class="tela-config" id="tela-config">
+    <div class="config-card">
+      <div class="limites-header">
+        <h2>Configurações</h2>
+        <button class="btn-fechar-limites" onclick="fecharConfig()"><i class="ti ti-x"></i></button>
+      </div>
+
+      <div class="config-secao">
+        <p class="config-secao-titulo">Família</p>
+        <div class="config-item">
+          <span class="config-label">Nome da família</span>
+          <span class="config-valor" id="config-nome-familia"></span>
+        </div>
+        <div class="config-item">
+          <span class="config-label">Código de convite</span>
+          <button class="btn-copiar-codigo" id="btn-copiar-codigo" onclick="copiarCodigo()">
+            <i class="ti ti-copy"></i> Copiar código
+          </button>
+        </div>
+        <div class="config-item">
+          <span class="config-label">Membros</span>
+          <div id="config-membros"></div>
+        </div>
+      </div>
+
+      <div class="config-secao">
+        <p class="config-secao-titulo">Limites por categoria</p>
+        <div id="limites-lista"></div>
+        <button class="btn-salvar-limites" onclick="salvarTodosLimites()">
+          <i class="ti ti-check"></i> Salvar limites
+        </button>
+      </div>
+
+      <div class="config-secao">
+        <p class="config-secao-titulo">Categorias</p>
+        <div class="cat-tipo-btns">
+          <button class="cat-tipo-btn active" onclick="setCatTipo('despesa',this)">Despesas</button>
+          <button class="cat-tipo-btn" onclick="setCatTipo('receita',this)">Receitas</button>
+          <button class="cat-tipo-btn" onclick="setCatTipo('poupanca',this)">Poupança</button>
+        </div>
+        <div id="cats-lista"></div>
+      </div>
+
+      <div class="config-secao">
+        <p class="config-secao-titulo">Conta</p>
+        <button class="btn-sair" onclick="sair()">
+          <i class="ti ti-logout"></i> Sair da conta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EXCLUSÃO -->
+  <div class="modal-overlay" id="modal-exclusao">
+    <div class="modal-card">
+      <p class="modal-titulo">Remover lançamento</p>
+      <p class="modal-desc">Essa ação não pode ser desfeita.</p>
+      <div class="modal-acoes">
+        <button class="modal-btn" onclick="fecharModal()">Cancelar</button>
+        <button class="modal-btn confirmar" id="modal-btn-confirmar">Remover</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app" id="app" style="display:none">
 
     <header class="top-bar">
       <div class="top-bar-left">
-        <i class="ti ti-wallet" aria-hidden="true"></i>
-        <span>Controle Familiar</span>
+        <i class="ti ti-wallet"></i>
+        <span>ControleDin</span>
       </div>
       <div class="top-bar-right">
-        <button class="perfil-badge" id="perfil-badge" onclick="trocarPerfil()" title="Trocar usuário"></button>
+        <span class="perfil-badge" id="perfil-badge"></span>
         <span id="mes-ref" class="mes-badge"></span>
-        <button class="sync-btn" onclick="carregarDados(false)" aria-label="Atualizar" title="Sincronizar">
-          <i class="ti ti-refresh" aria-hidden="true"></i>
+        <button class="sync-btn" onclick="carregarDados()" aria-label="Atualizar">
+          <i class="ti ti-refresh"></i>
+        </button>
+        <button class="sync-btn" onclick="abrirConfig()" aria-label="Configurações">
+          <i class="ti ti-settings"></i>
         </button>
       </div>
     </header>
 
     <nav class="tab-bar" role="tablist">
-      <button class="tab active" role="tab" aria-selected="true" onclick="irPara('lancar',this)">
-        <i class="ti ti-plus" aria-hidden="true"></i><span>Lançar</span>
+      <button class="tab active" role="tab" onclick="irPara('lancar',this)">
+        <i class="ti ti-plus"></i><span>Lançar</span>
       </button>
-      <button class="tab" role="tab" aria-selected="false" onclick="irPara('resumo',this)">
-        <i class="ti ti-chart-bar" aria-hidden="true"></i><span>Resumo</span>
+      <button class="tab" role="tab" onclick="irPara('resumo',this)">
+        <i class="ti ti-chart-bar"></i><span>Resumo</span>
       </button>
-      <button class="tab" role="tab" aria-selected="false" onclick="irPara('historico',this)">
-        <i class="ti ti-list" aria-hidden="true"></i><span>Histórico</span>
+      <button class="tab" role="tab" onclick="irPara('historico',this)">
+        <i class="ti ti-list"></i><span>Histórico</span>
       </button>
     </nav>
 
     <!-- ABA LANÇAR -->
-    <section class="section active" id="sec-lancar" aria-label="Novo lançamento">
+    <section class="section active" id="sec-lancar">
       <p class="secao-titulo-lancar" id="lancar-titulo">Novo lançamento</p>
       <div class="field">
         <label>Tipo</label>
         <div class="tipo-btns" role="group">
           <button class="tipo-btn despesa active" onclick="setTipo('despesa',this)" aria-pressed="true">
-            <i class="ti ti-arrow-up-circle" aria-hidden="true"></i>Despesa
+            <i class="ti ti-arrow-up-circle"></i>Despesa
           </button>
           <button class="tipo-btn receita" onclick="setTipo('receita',this)" aria-pressed="false">
-            <i class="ti ti-arrow-down-circle" aria-hidden="true"></i>Receita
+            <i class="ti ti-arrow-down-circle"></i>Receita
           </button>
           <button class="tipo-btn poupanca" onclick="setTipo('poupanca',this)" aria-pressed="false">
-            <i class="ti ti-piggy-bank" aria-hidden="true"></i>Poupança
+            <i class="ti ti-piggy-bank"></i>Poupança
           </button>
         </div>
       </div>
       <div class="field">
         <label for="valor">Valor</label>
         <div class="valor-wrap">
-          <span class="valor-prefix" aria-hidden="true">R$</span>
+          <span class="valor-prefix">R$</span>
           <input type="text" id="valor" placeholder="0,00" inputmode="decimal" autocomplete="off">
         </div>
       </div>
@@ -117,40 +220,28 @@
       </div>
       <div class="field">
         <label>Para quem</label>
-        <div class="paraquem-btns" role="group">
-          <button class="paraquem-btn active" data-nome="Família" onclick="setParaQuem('Família',this)" aria-pressed="true">Família</button>
-          <button class="paraquem-btn" data-nome="Jayme" onclick="setParaQuem('Jayme',this)" aria-pressed="false">Jayme</button>
-          <button class="paraquem-btn" data-nome="Rita" onclick="setParaQuem('Rita',this)" aria-pressed="false">Rita</button>
-          <button class="paraquem-btn" data-nome="Davi" onclick="setParaQuem('Davi',this)" aria-pressed="false">Davi</button>
-          <button class="paraquem-btn" data-nome="Lucas" onclick="setParaQuem('Lucas',this)" aria-pressed="false">Lucas</button>
-        </div>
+        <div class="paraquem-btns" id="paraquem-btns" role="group"></div>
       </div>
       <div class="field">
         <label for="data">Data</label>
         <input type="date" id="data">
       </div>
       <button class="btn-lancar" onclick="lancar()">
-        <i class="ti ti-check" aria-hidden="true"></i>
-        Confirmar lançamento
+        <i class="ti ti-check"></i> Confirmar lançamento
       </button>
       <button class="btn-cancelar-edicao" id="btn-cancelar-edicao" onclick="fecharEdicao()" style="display:none;">
-        <i class="ti ti-x" aria-hidden="true"></i>
-        Cancelar edição
+        <i class="ti ti-x"></i> Cancelar edição
       </button>
     </section>
 
     <!-- ABA RESUMO -->
-    <section class="section" id="sec-resumo" aria-label="Resumo do mês">
+    <section class="section" id="sec-resumo">
       <div class="resumo-topo">
         <div class="field field-mes">
-          <select id="resumo-mes-sel" onchange="renderResumo()">
+          <select id="resumo-mes-sel" onchange="filtroMesResumo=this.value;renderResumo()">
             <option value="">Todos os meses</option>
           </select>
         </div>
-        <button class="btn-limites" onclick="abrirLimites()" title="Configurar limites">
-          <i class="ti ti-adjustments" aria-hidden="true"></i>
-          Limites
-        </button>
       </div>
       <div class="resumo-cards" id="cards-resumo"></div>
       <p class="secao-title">Despesas por categoria</p>
@@ -159,7 +250,7 @@
     </section>
 
     <!-- ABA HISTÓRICO -->
-    <section class="section" id="sec-historico" aria-label="Histórico de lançamentos">
+    <section class="section" id="sec-historico">
       <div class="historico-filtros">
         <div class="filtros">
           <button class="filtro-btn active" onclick="setFiltro('todos',this)">Todos</button>
@@ -174,23 +265,14 @@
         </div>
       </div>
       <div class="lista-lancamentos" id="lista"></div>
+      <div id="paginacao" class="paginacao"></div>
     </section>
 
   </div>
 
-  <!-- MODAL CONFIRMAÇÃO EXCLUSÃO -->
-  <div class="modal-overlay" id="modal-exclusao">
-    <div class="modal-card">
-      <p class="modal-titulo">Remover lançamento</p>
-      <p class="modal-desc">Essa ação não pode ser desfeita.</p>
-      <div class="modal-acoes">
-        <button class="modal-btn" onclick="fecharModal()">Cancelar</button>
-        <button class="modal-btn confirmar" id="modal-btn-confirmar">Remover</button>
-      </div>
-    </div>
-  </div>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
+
+  <!-- Firebase -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>

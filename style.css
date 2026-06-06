@@ -451,3 +451,373 @@ body {
   cursor: pointer; font-size: 16px; transition: all 0.15s; opacity: 0.5;
 }
 .btn-copy:hover { opacity: 1; color: var(--roxo); }
+
+/* ── Ícone colorido por categoria ── */
+.cat-icon-small {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.barra-cat-label {
+  display: flex; align-items: center; gap: 7px;
+}
+
+/* ── Badge recente (lado direito) ── */
+.lanc-val-wrap {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0;
+}
+.badge-recente {
+  font-size: 10px; font-weight: 600;
+  color: var(--verde); background: var(--verde-claro);
+  border: 0.5px solid var(--verde);
+  padding: 1px 6px; border-radius: 99px;
+  letter-spacing: 0.03em; white-space: nowrap;
+}
+
+/* ── Botão duplicar ── */
+.btn-copy {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  border: none; background: none; color: var(--texto-sec);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all 0.15s; opacity: 0.5;
+}
+.btn-copy:hover { opacity: 1; color: var(--roxo); }
+
+/* ── Paginação ── */
+.paginacao {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 1rem 0; flex-wrap: wrap;
+}
+.pag-info { font-size: 12px; color: var(--texto-sec); }
+.pag-controles { display: flex; align-items: center; gap: 8px; }
+.pag-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 0.5px solid var(--borda-forte); background: var(--superficie);
+  color: var(--texto); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all 0.15s;
+}
+.pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.pag-label { font-size: 13px; color: var(--texto); font-weight: 500; }
+.pag-select {
+  font-family: var(--fonte); font-size: 13px; padding: 6px 10px;
+  border: 0.5px solid var(--borda-forte); border-radius: var(--radius-md);
+  background: var(--superficie); color: var(--texto); cursor: pointer;
+}
+
+/* ── Tela de categorias ── */
+.tela-categorias {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6);
+  align-items: flex-end; justify-content: center;
+}
+.tela-categorias.active { display: flex; }
+.categorias-card {
+  background: var(--superficie); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem 1.25rem; width: 100%; max-width: 480px;
+  max-height: 88dvh; overflow-y: auto;
+}
+.cat-tipo-btns {
+  display: flex; gap: 6px; margin-bottom: 1.25rem;
+}
+.cat-tipo-btn {
+  flex: 1; padding: 8px; border-radius: var(--radius-md);
+  border: 0.5px solid var(--borda-forte); background: var(--superficie);
+  color: var(--texto-sec); font-family: var(--fonte); font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: all 0.15s;
+}
+.cat-tipo-btn.active { background: var(--texto); color: var(--superficie); border-color: var(--texto); }
+
+.cat-grupo { margin-bottom: 1rem; }
+.cat-grupo-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 0.5px solid var(--borda);
+  margin-bottom: 6px;
+}
+.cat-nome { flex: 1; font-size: 14px; font-weight: 600; color: var(--texto); }
+.btn-remover-cat {
+  border: none; background: none; color: var(--texto-sec);
+  cursor: pointer; font-size: 15px; opacity: 0.5; padding: 4px;
+  transition: all 0.15s;
+}
+.btn-remover-cat:hover { opacity: 1; color: var(--verm); }
+
+.subcats-lista { padding-left: 34px; display: flex; flex-direction: column; gap: 4px; }
+.subcat-item {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; color: var(--texto-sec); padding: 4px 0;
+}
+.btn-remover-subcat {
+  border: none; background: none; color: var(--texto-sec);
+  cursor: pointer; font-size: 13px; opacity: 0.4; padding: 2px 6px;
+  transition: all 0.15s;
+}
+.btn-remover-subcat:hover { opacity: 1; color: var(--verm); }
+.btn-add-subcat {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--verde); border: none; background: none;
+  cursor: pointer; padding: 4px 0; font-family: var(--fonte); margin-top: 2px;
+}
+.btn-add-cat {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 12px; border-radius: var(--radius-md);
+  border: 0.5px dashed var(--borda-forte); background: none;
+  color: var(--texto-sec); font-family: var(--fonte); font-size: 14px;
+  cursor: pointer; margin-top: 8px; transition: all 0.15s;
+}
+.btn-add-cat:hover { border-color: var(--verde); color: var(--verde); }
+
+/* ── Barra aviso (amarelo) ── */
+.barra-fill.aviso { background: #F0A500; }
+
+/* ── Limite-pct badge ── */
+.limite-pct {
+  font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 99px;
+}
+.limite-pct.ok     { background: var(--verde-claro); color: var(--verde-texto); }
+.limite-pct.aviso  { background: #FFF3CD; color: #7A5C00; }
+.limite-pct.alerta { background: var(--verm-claro); color: var(--verm-texto); }
+.limite-ref { color: var(--texto-sec); font-size: 12px; }
+.barra-valores { display: flex; align-items: center; gap: 6px; }
+
+/* ── Tela limites ── */
+.tela-limites {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6);
+  align-items: flex-end; justify-content: center;
+}
+.tela-limites.active { display: flex; }
+.limites-card {
+  background: var(--superficie); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem 1.25rem; width: 100%; max-width: 480px;
+  max-height: 85dvh; overflow-y: auto;
+}
+.limites-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.limites-header h2 { font-size: 17px; font-weight: 600; }
+.btn-fechar-limites {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: var(--fundo); color: var(--texto-sec);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px;
+}
+.limites-desc { font-size: 13px; color: var(--texto-sec); margin-bottom: 1.25rem; }
+.limite-item {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--borda);
+}
+.limite-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--texto); flex: 1; }
+.limite-input-wrap { display: flex; align-items: center; gap: 4px; }
+.limite-prefix { font-size: 13px; color: var(--texto-sec); }
+.limite-input {
+  width: 90px; font-family: var(--fonte); font-size: 14px;
+  color: var(--texto); background: var(--fundo);
+  border: 0.5px solid var(--borda-forte); border-radius: var(--radius-sm);
+  padding: 7px 10px; text-align: right;
+}
+.limite-input:focus { outline: none; border-color: var(--verde); }
+.btn-salvar-limites {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 14px; background: var(--verde); color: #fff;
+  border: none; border-radius: var(--radius-lg); font-family: var(--fonte);
+  font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1.25rem;
+}
+
+/* ── Topo resumo ── */
+.resumo-topo {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap;
+}
+.resumo-topo .field-mes { flex: 1; margin-bottom: 0; min-width: 120px; }
+.btn-limites {
+  display: flex; align-items: center; gap: 6px; padding: 8px 12px;
+  border-radius: var(--radius-md); border: 0.5px solid var(--borda-forte);
+  background: var(--superficie); color: var(--texto-sec);
+  font-family: var(--fonte); font-size: 13px; font-weight: 500;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.btn-limites:hover { border-color: var(--verde); color: var(--verde); }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.5); align-items: flex-end; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-card {
+  background: var(--superficie); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem 1.25rem; width: 100%; max-width: 480px;
+}
+.modal-titulo { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.modal-desc   { font-size: 14px; color: var(--texto-sec); margin-bottom: 1.25rem; }
+.modal-acoes  { display: flex; gap: 10px; }
+.modal-btn {
+  flex: 1; padding: 13px; border-radius: var(--radius-md);
+  font-family: var(--fonte); font-size: 15px; font-weight: 500;
+  cursor: pointer; border: 0.5px solid var(--borda-forte);
+  background: var(--superficie); color: var(--texto); transition: all 0.15s;
+}
+.modal-btn.confirmar { background: var(--verm); color: #fff; border-color: var(--verm); }
+
+/* ── Skeleton ── */
+@keyframes shimmer { 0%{opacity:0.4} 50%{opacity:0.8} 100%{opacity:0.4} }
+.skeleton-item {
+  height: 64px; border-radius: var(--radius-md);
+  background: var(--superficie); border: 0.5px solid var(--borda);
+  animation: shimmer 1.4s ease-in-out infinite; margin-bottom: 8px;
+}
+
+/* ── Titulo seção lançar ── */
+.secao-titulo-lancar { font-size: 15px; font-weight: 600; color: var(--texto); margin-bottom: 1rem; }
+
+/* ── Botão editar ── */
+.btn-edit {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  border: none; background: none; color: var(--texto-sec);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all 0.15s; opacity: 0.5;
+}
+.btn-edit:hover { opacity: 1; color: var(--verde); }
+
+/* ── Botão cancelar edição ── */
+.btn-cancelar-edicao {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 13px; background: none;
+  color: var(--texto-sec); border: 0.5px solid var(--borda-forte);
+  border-radius: var(--radius-lg); font-family: var(--fonte);
+  font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: all 0.15s;
+}
+.btn-cancelar-edicao:hover { border-color: var(--verm); color: var(--verm); }
+
+/* ── Filtro mês histórico ── */
+.historico-filtros { margin-bottom: 1rem; }
+.field-mes { margin-bottom: 0.75rem; }
+.field-mes select { font-size: 14px; padding: 8px 36px 8px 12px; }
+
+/* ── Tela perfil ── */
+.tela-perfil {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 1.5rem;
+}
+.tela-perfil.active { display: flex; }
+.perfil-card {
+  background: var(--superficie); border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem; width: 100%; max-width: 320px; text-align: center;
+}
+.perfil-card i { font-size: 40px; color: var(--verde); display: block; margin-bottom: 1rem; }
+.perfil-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.perfil-card p  { font-size: 14px; color: var(--texto-sec); margin-bottom: 1.5rem; }
+.perfil-opcoes  { display: flex; flex-direction: column; gap: 10px; }
+.perfil-btn {
+  padding: 14px; border-radius: var(--radius-md);
+  border: 0.5px solid var(--borda-forte); background: var(--superficie);
+  color: var(--texto); font-family: var(--fonte); font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+}
+.perfil-btn:hover { background: var(--verde-claro); border-color: var(--verde); color: var(--verde-texto); }
+.perfil-badge {
+  font-size: 12px; font-weight: 600; color: var(--verde-texto);
+  background: var(--verde-claro); border: 0.5px solid var(--verde);
+  padding: 4px 10px; border-radius: 99px; cursor: pointer; font-family: var(--fonte); transition: opacity 0.15s;
+}
+.perfil-badge:hover { opacity: 0.8; }
+
+/* ── Para quem ── */
+.paraquem-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.paraquem-btn {
+  padding: 8px 14px; border-radius: 99px;
+  border: 0.5px solid var(--borda-forte); background: var(--superficie);
+  color: var(--texto-sec); font-family: var(--fonte); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+}
+.paraquem-btn.active { background: var(--texto); color: var(--superficie); border-color: var(--texto); }
+
+/* ── Spinner ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 0.7s linear infinite; }
+
+/* ── Login ── */
+.tela-login {
+  display: flex; position: fixed; inset: 0; z-index: 200;
+  background: var(--fundo); align-items: center; justify-content: center; padding: 1.5rem;
+}
+.login-card {
+  background: var(--superficie); border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem; width: 100%; max-width: 360px; text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.login-logo { width: 64px; height: 64px; border-radius: 50%; background: var(--verde-claro); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+.login-logo i { font-size: 32px; color: var(--verde); }
+.login-titulo { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+.login-sub    { font-size: 14px; color: var(--texto-sec); margin-bottom: 2rem; }
+.btn-google {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 14px; border-radius: var(--radius-md);
+  border: 0.5px solid var(--borda-forte); background: var(--superficie);
+  color: var(--texto); font-family: var(--fonte); font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-google:hover { background: var(--fundo); }
+.login-rodape { font-size: 12px; color: var(--texto-sec); margin-top: 1.25rem; }
+
+/* ── Família ── */
+.tela-familia {
+  display: none; position: fixed; inset: 0; z-index: 150;
+  background: var(--fundo); align-items: center; justify-content: center; padding: 1.5rem;
+}
+.familia-card {
+  background: var(--superficie); border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem; width: 100%; max-width: 360px; text-align: center;
+}
+.familia-card i { font-size: 40px; color: var(--verde); display: block; margin-bottom: 1rem; }
+.familia-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.familia-card p  { font-size: 14px; color: var(--texto-sec); margin-bottom: 1.5rem; }
+.familia-opcoes  { display: flex; flex-direction: column; gap: 10px; }
+.familia-btn {
+  padding: 14px; border-radius: var(--radius-md);
+  border: 0.5px solid var(--borda-forte); background: var(--superficie);
+  color: var(--texto); font-family: var(--fonte); font-size: 15px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s;
+}
+.familia-btn.principal { background: var(--verde); color: #fff; border-color: var(--verde); }
+
+/* ── Configurações ── */
+.tela-config {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6); align-items: flex-end; justify-content: center;
+}
+.tela-config.active { display: flex; }
+.config-card {
+  background: var(--superficie); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem 1.25rem; width: 100%; max-width: 480px;
+  max-height: 90dvh; overflow-y: auto;
+}
+.config-secao { margin-bottom: 1.5rem; }
+.config-secao-titulo {
+  font-size: 11px; font-weight: 600; color: var(--texto-sec);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.config-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 0.5px solid var(--borda); gap: 12px;
+}
+.config-label { font-size: 14px; color: var(--texto-sec); }
+.config-valor { font-size: 14px; font-weight: 500; color: var(--texto); }
+.config-membro-badge {
+  display: inline-block; font-size: 12px; font-weight: 500;
+  background: var(--verde-claro); color: var(--verde-texto);
+  border: 0.5px solid var(--verde); padding: 3px 10px; border-radius: 99px; margin: 2px;
+}
+.btn-copiar-codigo {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border-radius: var(--radius-sm); border: 0.5px solid var(--borda-forte);
+  background: var(--superficie); color: var(--texto-sec);
+  font-family: var(--fonte); font-size: 13px; cursor: pointer; transition: all 0.15s;
+}
+.btn-copiar-codigo:hover { border-color: var(--verde); color: var(--verde); }
+.btn-sair {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 13px; border-radius: var(--radius-md);
+  border: 0.5px solid var(--borda-forte); background: none;
+  color: var(--verm); font-family: var(--fonte); font-size: 15px; font-weight: 500; cursor: pointer;
+}
+
+/* ── Bolinha de cor nas barras ── */
+.bolinha-cat {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; display: inline-block;
+}
+.barra-cat-label { display: flex; align-items: center; gap: 7px; }

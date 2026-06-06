@@ -1,7 +1,7 @@
 {
-  "name": "Controle Financeiro Familiar",
-  "short_name": "Financeiro",
-  "description": "Controle de despesas e receitas da família",
+  "name": "ControleDin",
+  "short_name": "ControleDin",
+  "description": "Gestão financeira familiar",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F8F7F4",
