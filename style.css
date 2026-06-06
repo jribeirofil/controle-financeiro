@@ -296,3 +296,34 @@ body {
 .paraquem-btn.active {
   background: var(--texto); color: var(--superficie); border-color: var(--texto);
 }
+
+/* ── Título seção lançar ── */
+.secao-titulo-lancar {
+  font-size: 15px; font-weight: 600; color: var(--texto);
+  margin-bottom: 1rem;
+}
+
+/* ── Botão editar ── */
+.btn-edit {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  border: none; background: none; color: var(--texto-sec);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all 0.15s; opacity: 0.5;
+}
+.btn-edit:hover { opacity: 1; color: var(--verde); }
+
+/* ── Botão cancelar edição ── */
+.btn-cancelar-edicao {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 13px; background: none;
+  color: var(--texto-sec); border: 0.5px solid var(--borda-forte);
+  border-radius: var(--radius-lg); font-family: var(--fonte);
+  font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px;
+  transition: all 0.15s;
+}
+.btn-cancelar-edicao:hover { border-color: var(--verm); color: var(--verm); }
+
+/* ── Filtro mês histórico ── */
+.historico-filtros { margin-bottom: 1rem; }
+.field-mes { margin-bottom: 0.75rem; }
+.field-mes select { font-size: 14px; padding: 8px 36px 8px 12px; }

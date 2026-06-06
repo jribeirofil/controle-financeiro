@@ -1,8 +1,8 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4nXNyorJ9lcCKX7nYEwcW4shrI9NeSkumlFGV5HaHuU9JNCc_L17DCjCNoSTLz48/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytuEnOItCWqncrChzMe_kINOPQtLfjIPxaO-yCvo3bb9tAph-j2KqdxCDRASEvs4bG/exec';
 
 // ── Membros da família ────────────────────────────────────────────────────────
-const ADULTOS  = ['Jayme', 'Rita'];
-const CRIANCAS = ['Davi', 'Lucas'];
+const ADULTOS       = ['Jayme', 'Rita'];
+const CRIANCAS      = ['Davi', 'Lucas'];
 const TODOS_MEMBROS = ['Família', ...ADULTOS, ...CRIANCAS];
 
 // ── Categorias ────────────────────────────────────────────────────────────────
@@ -34,10 +34,12 @@ const ICONES = {
 };
 
 // ── Estado ────────────────────────────────────────────────────────────────────
-let tipoAtual    = 'despesa';
+let tipoAtual     = 'despesa';
 let paraQuemAtual = 'Família';
-let filtroAtual  = 'todos';
-let lancamentos  = [];
+let filtroAtual   = 'todos';
+let filtroMes     = '';  // 'YYYY-MM' ou '' para todos
+let lancamentos   = [];
+let editandoId    = null;  // ID do lançamento em edição
 
 function scriptConfigurado() {
   return SCRIPT_URL && SCRIPT_URL !== 'COLE_A_URL_DO_APPS_SCRIPT_AQUI';
@@ -47,24 +49,15 @@ function scriptConfigurado() {
 function getPerfil() {
   return localStorage.getItem('perfil_usuario');
 }
-
 function setPerfil(nome) {
   localStorage.setItem('perfil_usuario', nome);
 }
-
-function verificarPerfil() {
-  if (!getPerfil()) {
-    document.getElementById('tela-perfil').classList.add('active');
-  }
-}
-
 function escolherPerfil(nome) {
   setPerfil(nome);
   document.getElementById('tela-perfil').classList.remove('active');
   document.getElementById('perfil-badge').textContent = nome;
   mostrarToast('Olá, ' + nome + '!', 'sucesso');
 }
-
 function trocarPerfil() {
   if (!confirm('Trocar de usuário?')) return;
   localStorage.removeItem('perfil_usuario');
@@ -77,7 +70,6 @@ async function apiListar() {
   const json = await res.json();
   return json.lancamentos || [];
 }
-
 async function apiAdicionar(lanc) {
   const res = await fetch(SCRIPT_URL, {
     method: 'POST',
@@ -85,7 +77,13 @@ async function apiAdicionar(lanc) {
   });
   return res.json();
 }
-
+async function apiAtualizar(lanc) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ ...lanc, action: 'atualizar' }),
+  });
+  return res.json();
+}
 async function apiDeletar(id) {
   const res = await fetch(`${SCRIPT_URL}?action=deletar&id=${id}`);
   return res.json();
@@ -98,17 +96,14 @@ async function carregarDados(silencioso) {
     renderResumo();
     return;
   }
-
   mostrarSkeleton();
   try {
     lancamentos = await apiListar();
   } catch (e) {
     mostrarToast('Erro ao carregar. Verifique a conexão.', 'erro');
   }
-
   renderHistorico();
   renderResumo();
-
   const abaAtiva = document.querySelector('.section.active');
   if (abaAtiva && abaAtiva.id === 'sec-resumo')    renderResumo();
   if (abaAtiva && abaAtiva.id === 'sec-historico') renderHistorico();
@@ -152,11 +147,38 @@ function setParaQuem(nome, btn) {
   btn.setAttribute('aria-pressed','true');
 }
 
+// ── Filtro tipo ───────────────────────────────────────────────────────────────
 function setFiltro(filtro, btn) {
   filtroAtual = filtro;
   document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderHistorico();
+}
+
+// ── Filtro mês ────────────────────────────────────────────────────────────────
+function setFiltroMes(val) {
+  filtroMes = val;
+  renderHistorico();
+}
+
+function popularFiltroMes() {
+  const meses = {};
+  lancamentos.forEach(l => {
+    if (l.data) {
+      const m = String(l.data).substring(0, 7);
+      if (m) meses[m] = true;
+    }
+  });
+  const sel = document.getElementById('filtro-mes');
+  if (!sel) return;
+  const atual = sel.value;
+  sel.innerHTML = '<option value="">Todos os meses</option>';
+  Object.keys(meses).sort().reverse().forEach(m => {
+    const [ano, mes] = m.split('-');
+    const label = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    sel.innerHTML += `<option value="${m}">${label}</option>`;
+  });
+  if (atual) sel.value = atual;
 }
 
 // ── Categorias ────────────────────────────────────────────────────────────────
@@ -180,7 +202,7 @@ function atualizarSubcat() {
   }
 }
 
-// ── Lançar ────────────────────────────────────────────────────────────────────
+// ── Lançar / Salvar edição ────────────────────────────────────────────────────
 async function lancar() {
   const valorRaw = document.getElementById('valor').value.replace(',', '.');
   const valor    = parseFloat(valorRaw);
@@ -193,12 +215,41 @@ async function lancar() {
   if (!valor || valor <= 0) { mostrarToast('Informe o valor', 'erro'); return; }
   if (!cat) { mostrarToast('Selecione a categoria', 'erro'); return; }
 
+  const btnLancar = document.querySelector('.btn-lancar');
+  btnLancar.disabled = true;
+
+  // Modo edição
+  if (editandoId) {
+    const lanc = {
+      id: editandoId,
+      tipo: tipoAtual, valor, cat, subcat,
+      desc: desc || (subcat || cat),
+      paraQuem: paraQuemAtual,
+      registradoPor,
+      data,
+    };
+    btnLancar.innerHTML = '<i class="ti ti-loader-2 spin" aria-hidden="true"></i> Salvando...';
+    try {
+      if (scriptConfigurado()) await apiAtualizar(lanc);
+      const idx = lancamentos.findIndex(l => l.id === editandoId);
+      if (idx !== -1) lancamentos[idx] = lanc;
+      fecharEdicao();
+      mostrarToast('Lançamento atualizado!', 'sucesso');
+      renderHistorico();
+      renderResumo();
+    } catch (e) {
+      mostrarToast('Erro ao atualizar. Tente novamente.', 'erro');
+    } finally {
+      btnLancar.disabled = false;
+      btnLancar.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Confirmar lançamento';
+    }
+    return;
+  }
+
+  // Modo novo lançamento
   const lanc = {
     id: String(Date.now()),
-    tipo: tipoAtual,
-    valor,
-    cat,
-    subcat,
+    tipo: tipoAtual, valor, cat, subcat,
     desc: desc || (subcat || cat),
     paraQuem: paraQuemAtual,
     registradoPor,
@@ -209,13 +260,11 @@ async function lancar() {
     lancamentos.unshift(lanc);
     limparFormulario();
     mostrarToast('Lançamento salvo localmente', 'sucesso');
+    btnLancar.disabled = false;
     return;
   }
 
-  const btnLancar = document.querySelector('.btn-lancar');
-  btnLancar.disabled = true;
   btnLancar.innerHTML = '<i class="ti ti-loader-2 spin" aria-hidden="true"></i> Salvando...';
-
   try {
     await apiAdicionar(lanc);
     lancamentos.unshift(lanc);
@@ -234,12 +283,82 @@ function limparFormulario() {
   document.getElementById('descricao').value = '';
   document.getElementById('categoria').value = '';
   document.getElementById('subcategoria').innerHTML = '<option value="">Selecione...</option>';
-  // Reseta para Família
   paraQuemAtual = 'Família';
   document.querySelectorAll('.paraquem-btn').forEach(b => {
     b.classList.remove('active');
     if (b.dataset.nome === 'Família') b.classList.add('active');
   });
+  const hoje = new Date();
+  document.getElementById('data').value = hoje.toISOString().split('T')[0];
+}
+
+// ── Editar ────────────────────────────────────────────────────────────────────
+function abrirEdicao(id) {
+  const l = lancamentos.find(l => l.id === id);
+  if (!l) return;
+
+  editandoId = id;
+
+  // Muda título e botão
+  document.getElementById('lancar-titulo').textContent = 'Editar lançamento';
+  const btn = document.querySelector('.btn-lancar');
+  btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Salvar alterações';
+  document.getElementById('btn-cancelar-edicao').style.display = 'flex';
+
+  // Preenche tipo
+  setTipoSilencioso(l.tipo);
+
+  // Preenche valor
+  document.getElementById('valor').value = String(l.valor).replace('.', ',');
+
+  // Preenche categoria e subcategoria
+  popularCats();
+  const selCat = document.getElementById('categoria');
+  selCat.value = l.cat;
+  atualizarSubcat();
+  document.getElementById('subcategoria').value = l.subcat || '';
+
+  // Preenche descrição
+  document.getElementById('descricao').value = l.desc || '';
+
+  // Preenche para quem
+  paraQuemAtual = l.paraQuem || 'Família';
+  document.querySelectorAll('.paraquem-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.dataset.nome === paraQuemAtual) b.classList.add('active');
+  });
+
+  // Preenche data
+  document.getElementById('data').value = l.data || '';
+
+  // Navega para aba lançar
+  const tabLancar = document.querySelector('.tab[aria-controls="sec-lancar"], .tab:first-child');
+  irPara('lancar', document.querySelectorAll('.tab')[0]);
+
+  // Scroll para o topo
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setTipoSilencioso(tipo) {
+  tipoAtual = tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('aria-pressed', 'false');
+    if (b.classList.contains(tipo)) {
+      b.classList.add('active');
+      b.setAttribute('aria-pressed', 'true');
+    }
+  });
+}
+
+function fecharEdicao() {
+  editandoId = null;
+  document.getElementById('lancar-titulo').textContent = 'Novo lançamento';
+  const btn = document.querySelector('.btn-lancar');
+  btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Confirmar lançamento';
+  document.getElementById('btn-cancelar-edicao').style.display = 'none';
+  limparFormulario();
+  setTipoSilencioso('despesa');
 }
 
 // ── Deletar ───────────────────────────────────────────────────────────────────
@@ -283,6 +402,15 @@ function fmtBRL(v) {
 }
 function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function parseFmtData(dataStr) {
+  try {
+    const partes = String(dataStr).substring(0,10).split('-');
+    if (partes.length === 3) {
+      return new Date(partes[0], partes[1]-1, partes[2]).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    }
+  } catch(e){}
+  return '';
 }
 
 // ── Resumo ────────────────────────────────────────────────────────────────────
@@ -331,25 +459,24 @@ function renderHistorico() {
   const lista = document.getElementById('lista');
   if (!lista) return;
 
-  const filtrados = filtroAtual==='todos' ? lancamentos : lancamentos.filter(l=>l.tipo===filtroAtual);
+  popularFiltroMes();
+
+  let filtrados = filtroAtual==='todos' ? [...lancamentos] : lancamentos.filter(l=>l.tipo===filtroAtual);
+
+  // Filtro de mês
+  if (filtroMes) {
+    filtrados = filtrados.filter(l => l.data && String(l.data).substring(0,7) === filtroMes);
+  }
 
   if (!filtrados.length) {
-    lista.innerHTML = '<div class="empty-state"><i class="ti ti-inbox" aria-hidden="true"></i>Nenhum lançamento ainda</div>';
+    lista.innerHTML = '<div class="empty-state"><i class="ti ti-inbox" aria-hidden="true"></i>Nenhum lançamento encontrado</div>';
     return;
   }
 
   lista.innerHTML = filtrados.map(l => {
-    const sinal  = l.tipo==='despesa' ? '–' : '+';
-    const icone  = ICONES[l.cat] || 'ti-circle';
-    let dataFmt  = '';
-    if (l.data) {
-      try {
-        const partes = String(l.data).substring(0,10).split('-');
-        if (partes.length === 3) {
-          dataFmt = new Date(partes[0], partes[1]-1, partes[2]).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-        }
-      } catch(e){}
-    }
+    const sinal    = l.tipo==='despesa' ? '–' : '+';
+    const icone    = ICONES[l.cat] || 'ti-circle';
+    const dataFmt  = l.data ? parseFmtData(l.data) : '';
     const paraQuem = l.paraQuem || l.resp || '';
     const porQuem  = l.registradoPor ? ' · por ' + l.registradoPor : '';
     return `
@@ -360,6 +487,9 @@ function renderHistorico() {
           <div class="lanc-sub">${escHtml(l.subcat||l.cat)}${paraQuem?' · '+escHtml(paraQuem):''}${porQuem}${dataFmt?' · '+dataFmt:''}</div>
         </div>
         <div class="lanc-val ${l.tipo}">${sinal} ${fmtBRL(l.valor)}</div>
+        <button class="btn-edit" onclick="abrirEdicao('${escHtml(String(l.id))}')" aria-label="Editar">
+          <i class="ti ti-pencil" aria-hidden="true"></i>
+        </button>
         <button class="btn-del" onclick="deletar('${escHtml(String(l.id))}',this)" aria-label="Remover">
           <i class="ti ti-trash" aria-hidden="true"></i>
         </button>
@@ -374,7 +504,6 @@ function renderHistorico() {
   document.getElementById('mes-ref').textContent =
     hoje.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
 
-  // Perfil
   const perfil = getPerfil();
   if (perfil) {
     document.getElementById('perfil-badge').textContent = perfil;

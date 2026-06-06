@@ -16,7 +16,7 @@
 </head>
 <body>
 
-  <!-- TELA DE PERFIL (primeira abertura) -->
+  <!-- TELA DE PERFIL -->
   <div class="tela-perfil" id="tela-perfil">
     <div class="perfil-card">
       <i class="ti ti-users" aria-hidden="true"></i>
@@ -59,6 +59,8 @@
 
     <!-- ABA LANÇAR -->
     <section class="section active" id="sec-lancar" aria-label="Novo lançamento">
+
+      <p class="secao-titulo-lancar" id="lancar-titulo">Novo lançamento</p>
 
       <div class="field">
         <label>Tipo</label>
@@ -123,6 +125,11 @@
         Confirmar lançamento
       </button>
 
+      <button class="btn-cancelar-edicao" id="btn-cancelar-edicao" onclick="fecharEdicao()" style="display:none;">
+        <i class="ti ti-x" aria-hidden="true"></i>
+        Cancelar edição
+      </button>
+
     </section>
 
     <!-- ABA RESUMO -->
@@ -134,11 +141,18 @@
 
     <!-- ABA HISTÓRICO -->
     <section class="section" id="sec-historico" aria-label="Histórico de lançamentos">
-      <div class="filtros">
-        <button class="filtro-btn active" onclick="setFiltro('todos',this)">Todos</button>
-        <button class="filtro-btn" onclick="setFiltro('despesa',this)">Despesas</button>
-        <button class="filtro-btn" onclick="setFiltro('receita',this)">Receitas</button>
-        <button class="filtro-btn" onclick="setFiltro('poupanca',this)">Poupança</button>
+      <div class="historico-filtros">
+        <div class="filtros">
+          <button class="filtro-btn active" onclick="setFiltro('todos',this)">Todos</button>
+          <button class="filtro-btn" onclick="setFiltro('despesa',this)">Despesas</button>
+          <button class="filtro-btn" onclick="setFiltro('receita',this)">Receitas</button>
+          <button class="filtro-btn" onclick="setFiltro('poupanca',this)">Poupança</button>
+        </div>
+        <div class="field field-mes">
+          <select id="filtro-mes" onchange="setFiltroMes(this.value)">
+            <option value="">Todos os meses</option>
+          </select>
+        </div>
       </div>
       <div class="lista-lancamentos" id="lista"></div>
     </section>

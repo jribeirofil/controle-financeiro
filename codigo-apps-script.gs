@@ -25,6 +25,8 @@ function handleRequest(e) {
       resultado = listar();
     } else if (action === 'adicionar') {
       resultado = adicionar(body);
+    } else if (action === 'atualizar') {
+      resultado = atualizar(body);
     } else if (action === 'deletar') {
       resultado = deletar(e.parameter ? e.parameter.id : null);
     } else {
@@ -69,14 +71,15 @@ function listar() {
 
   const lancamentos = dados.slice(1).map(function(row) {
     return {
-      id:     String(row[0]),
-      data:   row[1] ? String(row[1]).substring(0, 10) : '',
-      tipo:   row[2],
-      cat:    row[3],
-      subcat: row[4],
-      desc:   row[5],
-      valor:  parseFloat(row[6]) || 0,
-      resp:   row[7]
+      id:            String(row[0]),
+      data:          row[1] ? Utilities.formatDate(new Date(row[1]), Session.getScriptTimeZone(), 'yyyy-MM-dd') : '',
+      tipo:          row[2],
+      cat:           row[3],
+      subcat:        row[4],
+      desc:          row[5],
+      valor:         parseFloat(row[6]) || 0,
+      paraQuem:      row[7] || '',
+      registradoPor: row[8] || '',
     };
   }).reverse();
 
@@ -121,6 +124,31 @@ function deletar(id) {
     }
   }
 
+  return { erro: 'Lancamento nao encontrado' };
+}
+
+function atualizar(lanc) {
+  if (!lanc.id) return { erro: 'ID nao informado' };
+
+  const sheet = getSheet();
+  const dados = sheet.getDataRange().getValues();
+
+  for (var i = 1; i < dados.length; i++) {
+    if (String(dados[i][0]) === String(lanc.id)) {
+      sheet.getRange(i + 1, 1, 1, 9).setValues([[
+        lanc.id,
+        lanc.data || dados[i][1],
+        lanc.tipo || dados[i][2],
+        lanc.cat  || dados[i][3],
+        lanc.subcat !== undefined ? lanc.subcat : dados[i][4],
+        lanc.desc || dados[i][5],
+        lanc.valor || dados[i][6],
+        lanc.paraQuem !== undefined ? lanc.paraQuem : dados[i][7],
+        lanc.registradoPor !== undefined ? lanc.registradoPor : dados[i][8],
+      ]]);
+      return { sucesso: true };
+    }
+  }
   return { erro: 'Lancamento nao encontrado' };
 }
 
