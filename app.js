@@ -208,6 +208,8 @@ function setTipo(tipo, btn) {
   document.querySelectorAll('.tipo-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
   btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
   popularCats();
+  // Avança para o campo valor
+  setTimeout(() => document.getElementById('valor').focus(), 100);
 }
 function setParaQuem(nome, btn) {
   paraQuemAtual = nome;
@@ -240,6 +242,8 @@ function atualizarSubcat() {
   sel.innerHTML = '<option value="">Selecione...</option>';
   if (cat && CATS[tipoAtual][cat]) {
     CATS[tipoAtual][cat].forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`);
+    // Avança para subcategoria
+    setTimeout(() => sel.focus(), 100);
   }
 }
 
@@ -280,7 +284,7 @@ async function lancar() {
   const lanc = {
     id: editandoId || String(Date.now()),
     tipo: tipoAtual, valor, cat, subcat,
-    desc: desc || (subcat || cat),
+    desc: desc || '',
     paraQuem: paraQuemAtual, registradoPor, data,
   };
 
@@ -363,7 +367,12 @@ function abrirEdicao(id) {
   document.getElementById('categoria').value = l.cat;
   atualizarSubcat();
   document.getElementById('subcategoria').value = l.subcat || '';
-  document.getElementById('descricao').value = l.desc || '';
+  // Só preenche descrição se o usuário tiver escrito algo (não subcategoria)
+  const descOriginal = l.desc || '';
+  const subcatOriginal = l.subcat || '';
+  const catOriginal = l.cat || '';
+  const descEhAutomatica = descOriginal === subcatOriginal || descOriginal === catOriginal;
+  document.getElementById('descricao').value = descEhAutomatica ? '' : descOriginal;
   paraQuemAtual = l.paraQuem || 'Família';
   document.querySelectorAll('.paraquem-btn').forEach(b => {
     b.classList.remove('active');
@@ -442,7 +451,12 @@ function duplicar(id) {
   document.getElementById('categoria').value = l.cat;
   atualizarSubcat();
   document.getElementById('subcategoria').value = l.subcat || '';
-  document.getElementById('descricao').value = l.desc || '';
+  // Só preenche descrição se o usuário tiver escrito algo (não subcategoria)
+  const descOriginal = l.desc || '';
+  const subcatOriginal = l.subcat || '';
+  const catOriginal = l.cat || '';
+  const descEhAutomatica = descOriginal === subcatOriginal || descOriginal === catOriginal;
+  document.getElementById('descricao').value = descEhAutomatica ? '' : descOriginal;
   paraQuemAtual = l.paraQuem || 'Família';
   document.querySelectorAll('.paraquem-btn').forEach(b => {
     b.classList.remove('active');
@@ -595,10 +609,13 @@ function renderHistorico() {
       <div class="lanc-item">
         <div class="lanc-icon ${l.tipo}"><i class="ti ${icone}" aria-hidden="true"></i></div>
         <div class="lanc-info">
-          <div class="lanc-desc">${badgeRecente}${escHtml(l.desc)}</div>
+          <div class="lanc-desc">${escHtml(l.desc || l.subcat || l.cat)}</div>
           <div class="lanc-sub">${escHtml(l.subcat||l.cat)}${paraQuem?' · '+escHtml(paraQuem):''}${porQuem}${dataFmt?' · '+dataFmt:''}</div>
         </div>
-        <div class="lanc-val ${l.tipo}">${sinal} ${fmtBRL(l.valor)}</div>
+        <div class="lanc-val-wrap">
+          ${badgeRecente}
+          <div class="lanc-val ${l.tipo}">${sinal} ${fmtBRL(l.valor)}</div>
+        </div>
         <button class="btn-edit" onclick="abrirEdicao('${escHtml(String(l.id))}')" aria-label="Editar">
           <i class="ti ti-pencil" aria-hidden="true"></i>
         </button>
@@ -627,4 +644,10 @@ function renderHistorico() {
   renderResumo();
   renderHistorico();
   if (scriptConfigurado()) carregarDados();
+
+  // Foco automático no campo valor ao abrir o app
+  setTimeout(() => {
+    const campoValor = document.getElementById('valor');
+    if (campoValor) campoValor.focus();
+  }, 500);
 })();

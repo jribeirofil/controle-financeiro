@@ -432,14 +432,15 @@ body {
 }
 
 /* ── Badge recente ── */
+.lanc-val-wrap {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0;
+}
 .badge-recente {
-  display: inline-block;
   font-size: 10px; font-weight: 600;
   color: var(--verde); background: var(--verde-claro);
   border: 0.5px solid var(--verde);
   padding: 1px 6px; border-radius: 99px;
-  margin-right: 6px; vertical-align: middle;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.03em; white-space: nowrap;
 }
 
 /* ── Botão duplicar ── */
