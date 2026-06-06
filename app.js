@@ -1,6 +1,9 @@
-// ── Configuração ──────────────────────────────────────────────────────────────
-// Após publicar o Apps Script, cole a URL aqui:
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-BVRrUe8L9V9AC_3RCuCmMFuh_Zs6afaurlcWYjdevWXzd-OWxmy6eOGWQ0detEIJ/exec';
+
+// ── Membros da família ────────────────────────────────────────────────────────
+const ADULTOS  = ['Jayme', 'Rita'];
+const CRIANCAS = ['Davi', 'Lucas'];
+const TODOS_MEMBROS = ['Família', ...ADULTOS, ...CRIANCAS];
 
 // ── Categorias ────────────────────────────────────────────────────────────────
 const CATS = {
@@ -31,13 +34,41 @@ const ICONES = {
 };
 
 // ── Estado ────────────────────────────────────────────────────────────────────
-let tipoAtual   = 'despesa';
-let respAtual   = 'Pessoa 1';
-let filtroAtual = 'todos';
-let lancamentos = [];
+let tipoAtual    = 'despesa';
+let paraQuemAtual = 'Família';
+let filtroAtual  = 'todos';
+let lancamentos  = [];
 
 function scriptConfigurado() {
   return SCRIPT_URL && SCRIPT_URL !== 'COLE_A_URL_DO_APPS_SCRIPT_AQUI';
+}
+
+// ── Perfil do dispositivo ─────────────────────────────────────────────────────
+function getPerfil() {
+  return localStorage.getItem('perfil_usuario');
+}
+
+function setPerfil(nome) {
+  localStorage.setItem('perfil_usuario', nome);
+}
+
+function verificarPerfil() {
+  if (!getPerfil()) {
+    document.getElementById('tela-perfil').classList.add('active');
+  }
+}
+
+function escolherPerfil(nome) {
+  setPerfil(nome);
+  document.getElementById('tela-perfil').classList.remove('active');
+  document.getElementById('perfil-badge').textContent = nome;
+  mostrarToast('Olá, ' + nome + '!', 'sucesso');
+}
+
+function trocarPerfil() {
+  if (!confirm('Trocar de usuário?')) return;
+  localStorage.removeItem('perfil_usuario');
+  document.getElementById('tela-perfil').classList.add('active');
 }
 
 // ── API Google Sheets ─────────────────────────────────────────────────────────
@@ -78,9 +109,8 @@ async function carregarDados(silencioso) {
   renderHistorico();
   renderResumo();
 
-  // Garante que a aba visível no momento reflete os dados novos imediatamente
   const abaAtiva = document.querySelector('.section.active');
-  if (abaAtiva && abaAtiva.id === 'sec-resumo') renderResumo();
+  if (abaAtiva && abaAtiva.id === 'sec-resumo')    renderResumo();
   if (abaAtiva && abaAtiva.id === 'sec-historico') renderHistorico();
 }
 
@@ -105,7 +135,7 @@ function irPara(id, btn) {
   if (id === 'historico') renderHistorico();
 }
 
-// ── Tipo e Responsável ────────────────────────────────────────────────────────
+// ── Tipo ──────────────────────────────────────────────────────────────────────
 function setTipo(tipo, btn) {
   tipoAtual = tipo;
   document.querySelectorAll('.tipo-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
@@ -114,9 +144,10 @@ function setTipo(tipo, btn) {
   popularCats();
 }
 
-function setResp(resp, btn) {
-  respAtual = resp;
-  document.querySelectorAll('.resp-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+// ── Para quem ─────────────────────────────────────────────────────────────────
+function setParaQuem(nome, btn) {
+  paraQuemAtual = nome;
+  document.querySelectorAll('.paraquem-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
   btn.classList.add('active');
   btn.setAttribute('aria-pressed','true');
 }
@@ -151,23 +182,29 @@ function atualizarSubcat() {
 
 // ── Lançar ────────────────────────────────────────────────────────────────────
 async function lancar() {
-  const valor  = parseFloat(document.getElementById('valor').value);
-  const cat    = document.getElementById('categoria').value;
-  const subcat = document.getElementById('subcategoria').value;
-  const desc   = document.getElementById('descricao').value.trim();
-  const data   = document.getElementById('data').value;
+  const valorRaw = document.getElementById('valor').value.replace(',', '.');
+  const valor    = parseFloat(valorRaw);
+  const cat      = document.getElementById('categoria').value;
+  const subcat   = document.getElementById('subcategoria').value;
+  const desc     = document.getElementById('descricao').value.trim();
+  const data     = document.getElementById('data').value;
+  const registradoPor = getPerfil() || 'Não identificado';
 
   if (!valor || valor <= 0) { mostrarToast('Informe o valor', 'erro'); return; }
   if (!cat) { mostrarToast('Selecione a categoria', 'erro'); return; }
 
   const lanc = {
     id: String(Date.now()),
-    tipo: tipoAtual, valor, cat, subcat,
+    tipo: tipoAtual,
+    valor,
+    cat,
+    subcat,
     desc: desc || (subcat || cat),
-    resp: respAtual, data,
+    paraQuem: paraQuemAtual,
+    registradoPor,
+    data,
   };
 
-  // Sem API: só salva local e mostra
   if (!scriptConfigurado()) {
     lancamentos.unshift(lanc);
     limparFormulario();
@@ -197,6 +234,12 @@ function limparFormulario() {
   document.getElementById('descricao').value = '';
   document.getElementById('categoria').value = '';
   document.getElementById('subcategoria').innerHTML = '<option value="">Selecione...</option>';
+  // Reseta para Família
+  paraQuemAtual = 'Família';
+  document.querySelectorAll('.paraquem-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.dataset.nome === 'Família') b.classList.add('active');
+  });
 }
 
 // ── Deletar ───────────────────────────────────────────────────────────────────
@@ -296,18 +339,20 @@ function renderHistorico() {
   }
 
   lista.innerHTML = filtrados.map(l => {
-    const sinal = l.tipo==='despesa' ? '–' : '+';
-    const icone = ICONES[l.cat] || 'ti-circle';
-    let dataFmt = '';
+    const sinal  = l.tipo==='despesa' ? '–' : '+';
+    const icone  = ICONES[l.cat] || 'ti-circle';
+    let dataFmt  = '';
     if (l.data) {
       try { dataFmt = new Date(l.data+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}); } catch(e){}
     }
+    const paraQuem = l.paraQuem || l.resp || '';
+    const porQuem  = l.registradoPor ? ' · por ' + l.registradoPor : '';
     return `
       <div class="lanc-item">
         <div class="lanc-icon ${l.tipo}"><i class="ti ${icone}" aria-hidden="true"></i></div>
         <div class="lanc-info">
           <div class="lanc-desc">${escHtml(l.desc)}</div>
-          <div class="lanc-sub">${escHtml(l.subcat||l.cat)} · ${escHtml(l.resp)}${dataFmt?' · '+dataFmt:''}</div>
+          <div class="lanc-sub">${escHtml(l.subcat||l.cat)}${paraQuem?' · '+escHtml(paraQuem):''}${porQuem}${dataFmt?' · '+dataFmt:''}</div>
         </div>
         <div class="lanc-val ${l.tipo}">${sinal} ${fmtBRL(l.valor)}</div>
         <button class="btn-del" onclick="deletar('${escHtml(String(l.id))}',this)" aria-label="Remover">
@@ -323,13 +368,18 @@ function renderHistorico() {
   document.getElementById('data').value = hoje.toISOString().split('T')[0];
   document.getElementById('mes-ref').textContent =
     hoje.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
+
+  // Perfil
+  const perfil = getPerfil();
+  if (perfil) {
+    document.getElementById('perfil-badge').textContent = perfil;
+  } else {
+    document.getElementById('tela-perfil').classList.add('active');
+  }
+
   popularCats();
   renderResumo();
   renderHistorico();
 
-  if (!scriptConfigurado()) {
-    mostrarToast('Configure a URL do Apps Script no app.js', 'erro');
-  } else {
-    carregarDados();
-  }
+  if (scriptConfigurado()) carregarDados();
 })();

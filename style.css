@@ -129,17 +129,10 @@ body {
 .resp-btn { flex-direction: row; justify-content: center; padding: 11px 6px; }
 .resp-btn.active { background: var(--texto); color: var(--superficie); border-color: var(--texto); }
 
-/* ── Valor ── 
+/* ── Valor ── */
 .valor-wrap { position: relative; }
 .valor-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 500; color: var(--texto-sec); pointer-events: none; }
-.valor-wrap input { padding-left: 70px !important; font-size: 24px; font-weight: 600; height: 58px; letter-spacing: -0.5px; }
-*/
-
-/* ── Valor ── */
-.valor-wrap { display: flex; align-items: center; background: var(--superficie); border: 0.5px solid var(--borda-forte); border-radius: var(--radius-md); height: 58px; padding: 0 14px; }
-.valor-wrap:focus-within { border-color: var(--verde); }
-.valor-prefix { font-size: 13px; font-weight: 500; color: var(--texto-sec); flex-shrink: 0; margin-right: 6px; }
-.valor-wrap input { flex: 1; border: none !important; background: none !important; padding: 0 !important; font-size: 24px; font-weight: 600; height: 100%; letter-spacing: -0.5px; color: var(--texto); outline: none; }
+.valor-wrap input { padding-left: 52px; font-size: 24px; font-weight: 600; height: 58px; letter-spacing: -0.5px; }
 
 /* ── Botão lançar ── */
 .btn-lancar {
@@ -241,3 +234,63 @@ body {
 .empty-state i { font-size: 40px; display: block; margin-bottom: 10px; opacity: 0.35; }
 
 .section { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+
+/* ── Tela de perfil ── */
+.tela-perfil {
+  display: none;
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6);
+  align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.tela-perfil.active { display: flex; }
+.perfil-card {
+  background: var(--superficie);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem;
+  width: 100%; max-width: 320px;
+  text-align: center;
+}
+.perfil-card i { font-size: 40px; color: var(--verde); display: block; margin-bottom: 1rem; }
+.perfil-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.perfil-card p  { font-size: 14px; color: var(--texto-sec); margin-bottom: 1.5rem; }
+.perfil-opcoes  { display: flex; flex-direction: column; gap: 10px; }
+.perfil-btn {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--borda-forte);
+  background: var(--superficie);
+  color: var(--texto);
+  font-family: var(--fonte); font-size: 16px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.perfil-btn:hover { background: var(--verde-claro); border-color: var(--verde); color: var(--verde-texto); }
+
+/* ── Perfil badge no top bar ── */
+.perfil-badge {
+  font-size: 12px; font-weight: 600;
+  color: var(--verde-texto);
+  background: var(--verde-claro);
+  border: 0.5px solid var(--verde);
+  padding: 4px 10px; border-radius: 99px;
+  cursor: pointer; font-family: var(--fonte);
+  transition: opacity 0.15s;
+}
+.perfil-badge:hover { opacity: 0.8; }
+
+/* ── Para quem buttons ── */
+.paraquem-btns {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.paraquem-btn {
+  padding: 8px 14px;
+  border-radius: 99px;
+  border: 0.5px solid var(--borda-forte);
+  background: var(--superficie);
+  color: var(--texto-sec);
+  font-family: var(--fonte); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.paraquem-btn.active {
+  background: var(--texto); color: var(--superficie); border-color: var(--texto);
+}

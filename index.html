@@ -15,6 +15,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- TELA DE PERFIL (primeira abertura) -->
+  <div class="tela-perfil" id="tela-perfil">
+    <div class="perfil-card">
+      <i class="ti ti-users" aria-hidden="true"></i>
+      <h2>Quem é você?</h2>
+      <p>Escolha seu nome para identificar seus lançamentos</p>
+      <div class="perfil-opcoes">
+        <button class="perfil-btn" onclick="escolherPerfil('Jayme')">Jayme</button>
+        <button class="perfil-btn" onclick="escolherPerfil('Rita')">Rita</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
 
     <header class="top-bar">
@@ -23,8 +37,9 @@
         <span>Controle Familiar</span>
       </div>
       <div class="top-bar-right">
+        <button class="perfil-badge" id="perfil-badge" onclick="trocarPerfil()" title="Trocar usuário"></button>
         <span id="mes-ref" class="mes-badge"></span>
-        <button class="sync-btn" onclick="carregarDados(false)" aria-label="Atualizar lançamentos" title="Sincronizar">
+        <button class="sync-btn" onclick="carregarDados(false)" aria-label="Atualizar" title="Sincronizar">
           <i class="ti ti-refresh" aria-hidden="true"></i>
         </button>
       </div>
@@ -44,6 +59,7 @@
 
     <!-- ABA LANÇAR -->
     <section class="section active" id="sec-lancar" aria-label="Novo lançamento">
+
       <div class="field">
         <label>Tipo</label>
         <div class="tipo-btns" role="group">
@@ -63,7 +79,7 @@
         <label for="valor">Valor</label>
         <div class="valor-wrap">
           <span class="valor-prefix" aria-hidden="true">R$</span>
-          <input type="text" id="valor" placeholder="0,00" inputmode="decimal" min="0" step="0.01" autocomplete="off">
+          <input type="text" id="valor" placeholder="0,00" inputmode="decimal" autocomplete="off">
         </div>
       </div>
 
@@ -87,11 +103,13 @@
       </div>
 
       <div class="field">
-        <label>Responsável</label>
-        <div class="resp-btns" role="group">
-          <button class="resp-btn active" onclick="setResp('Pessoa 1',this)" aria-pressed="true">Pessoa 1</button>
-          <button class="resp-btn" onclick="setResp('Pessoa 2',this)" aria-pressed="false">Pessoa 2</button>
-          <button class="resp-btn" onclick="setResp('Casal',this)" aria-pressed="false">Casal</button>
+        <label>Para quem</label>
+        <div class="paraquem-btns" role="group">
+          <button class="paraquem-btn active" data-nome="Família" onclick="setParaQuem('Família',this)" aria-pressed="true">Família</button>
+          <button class="paraquem-btn" data-nome="Jayme" onclick="setParaQuem('Jayme',this)" aria-pressed="false">Jayme</button>
+          <button class="paraquem-btn" data-nome="Rita" onclick="setParaQuem('Rita',this)" aria-pressed="false">Rita</button>
+          <button class="paraquem-btn" data-nome="Davi" onclick="setParaQuem('Davi',this)" aria-pressed="false">Davi</button>
+          <button class="paraquem-btn" data-nome="Lucas" onclick="setParaQuem('Lucas',this)" aria-pressed="false">Lucas</button>
         </div>
       </div>
 
@@ -104,6 +122,7 @@
         <i class="ti ti-check" aria-hidden="true"></i>
         Confirmar lançamento
       </button>
+
     </section>
 
     <!-- ABA RESUMO -->
