@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, collection, addDoc, updateDoc, deleteDoc,
   getDocs, getDoc, setDoc, query, where, orderBy, onSnapshot }
@@ -81,10 +81,10 @@ function mesAtual() { return new Date().toISOString().substring(0,7); }
 async function loginGoogle() {
   const btn = document.getElementById('btn-google');
   btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Entrando...';
+  btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Redirecionando...';
   try {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
   } catch(e) {
     mostrarToast('Erro ao entrar. Tente novamente.', 'erro');
     btn.disabled = false;
@@ -98,6 +98,13 @@ async function sair() {
   await signOut(auth);
   fecharConfig();
 }
+
+// Captura o resultado do redirect ao voltar do login Google
+getRedirectResult(auth).catch(e => {
+  if (e.code !== 'auth/no-current-user') {
+    mostrarToast('Erro ao entrar. Tente novamente.', 'erro');
+  }
+});
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
