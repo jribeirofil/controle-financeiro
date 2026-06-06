@@ -135,7 +135,7 @@ body {
 .valor-wrap { display: flex; align-items: center; background: var(--superficie); border: 0.5px solid var(--borda-forte); border-radius: var(--radius-md); height: 58px; padding: 0 14px; }
 .valor-wrap:focus-within { border-color: var(--verde); }
 .valor-prefix { font-size: 13px; font-weight: 500; color: var(--texto-sec); flex-shrink: 0; margin-right: 8px; }
-.valor-wrap input { flex: 1; border: none !important; background: none !important; padding: 0 !important; font-size: 24px; font-weight: 600; height: 100%; letter-spacing: -0.5px; color: var(--texto); outline: none; }
+.valor-wrap input { flex: 1; border: none !important; background: none !important; padding: 0 !important; font-size: 24px; font-weight: 600; height: 100%; letter-spacing: -0.5px; color: var(--texto); outline: none; -webkit-appearance: none; }
 
 /* ── Botão lançar ── */
 .btn-lancar {
@@ -431,9 +431,22 @@ body {
   background: var(--verm); color: #fff; border-color: var(--verm);
 }
 
-/* ── Destaque item novo ── */
-@keyframes highlight-new {
-  0%   { background: var(--verde-claro); }
-  100% { background: var(--superficie); }
+/* ── Badge recente ── */
+.badge-recente {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  color: var(--verde); background: var(--verde-claro);
+  border: 0.5px solid var(--verde);
+  padding: 1px 6px; border-radius: 99px;
+  margin-right: 6px; vertical-align: middle;
+  letter-spacing: 0.03em;
 }
-.lanc-item.novo { animation: highlight-new 1.8s ease-out forwards; }
+
+/* ── Botão duplicar ── */
+.btn-copy {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  border: none; background: none; color: var(--texto-sec);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all 0.15s; opacity: 0.5;
+}
+.btn-copy:hover { opacity: 1; color: var(--roxo); }

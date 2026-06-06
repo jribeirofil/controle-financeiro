@@ -299,11 +299,6 @@ async function lancar() {
       // Fecha teclado no celular
       document.activeElement && document.activeElement.blur();
       mostrarToast('Lançamento salvo!', 'sucesso');
-      // Destaca item novo no histórico após renderizar
-      setTimeout(() => {
-        const primeiro = document.querySelector('.lanc-item');
-        if (primeiro) primeiro.classList.add('novo');
-      }, 100);
 
       // Alerta de limite após novo lançamento
       verificarAlerteLimite(cat, data);
@@ -409,23 +404,56 @@ function deletar(id, btn) {
 
 function fecharModal() {
   document.getElementById('modal-exclusao').classList.remove('active');
-  _deletarId  = null;
-  _deletarBtn = null;
 }
 
 async function confirmarExclusao() {
+  const id  = _deletarId;
+  const btn = _deletarBtn;
   fecharModal();
-  if (!_deletarId) return;
-  if (_deletarBtn) _deletarBtn.disabled = true;
+  _deletarId  = null;
+  _deletarBtn = null;
+  if (!id) return;
+  if (btn) btn.disabled = true;
   try {
-    if (scriptConfigurado()) await apiDeletar(_deletarId);
-    lancamentos = lancamentos.filter(l => l.id !== _deletarId);
+    if (scriptConfigurado()) await apiDeletar(id);
+    lancamentos = lancamentos.filter(l => l.id !== id);
     renderHistorico(); renderResumo();
     mostrarToast('Removido', 'sucesso');
   } catch (e) {
     mostrarToast('Erro ao remover', 'erro');
-    if (_deletarBtn) _deletarBtn.disabled = false;
+    if (btn) btn.disabled = false;
   }
+}
+
+// ── Duplicar lançamento ──────────────────────────────────────────────────────
+function duplicar(id) {
+  const l = lancamentos.find(l => l.id === id);
+  if (!l) return;
+
+  // Abre formulário preenchido mas com novo ID e data de hoje
+  editandoId = null;
+  document.getElementById('lancar-titulo').textContent = 'Duplicar lançamento';
+  document.querySelector('.btn-lancar').innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> Confirmar duplicação';
+  document.getElementById('btn-cancelar-edicao').style.display = 'flex';
+
+  setTipoSilencioso(l.tipo);
+  document.getElementById('valor').value = String(l.valor).replace('.', ',');
+  popularCats();
+  document.getElementById('categoria').value = l.cat;
+  atualizarSubcat();
+  document.getElementById('subcategoria').value = l.subcat || '';
+  document.getElementById('descricao').value = l.desc || '';
+  paraQuemAtual = l.paraQuem || 'Família';
+  document.querySelectorAll('.paraquem-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.dataset.nome === paraQuemAtual) b.classList.add('active');
+  });
+  // Data de hoje por padrão
+  document.getElementById('data').value = new Date().toISOString().split('T')[0];
+
+  irPara('lancar', document.querySelectorAll('.tab')[0]);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => document.getElementById('valor').focus(), 300);
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -560,16 +588,22 @@ function renderHistorico() {
     const dataFmt  = l.data ? parseFmtData(l.data) : '';
     const paraQuem = l.paraQuem || l.resp || '';
     const porQuem  = l.registradoPor ? ' · por ' + l.registradoPor : '';
+    const hoje     = new Date().toISOString().split('T')[0];
+    const ehHoje   = l.data && String(l.data).substring(0,10) === hoje;
+    const badgeRecente = ehHoje ? '<span class="badge-recente">Recente</span>' : '';
     return `
       <div class="lanc-item">
         <div class="lanc-icon ${l.tipo}"><i class="ti ${icone}" aria-hidden="true"></i></div>
         <div class="lanc-info">
-          <div class="lanc-desc">${escHtml(l.desc)}</div>
+          <div class="lanc-desc">${badgeRecente}${escHtml(l.desc)}</div>
           <div class="lanc-sub">${escHtml(l.subcat||l.cat)}${paraQuem?' · '+escHtml(paraQuem):''}${porQuem}${dataFmt?' · '+dataFmt:''}</div>
         </div>
         <div class="lanc-val ${l.tipo}">${sinal} ${fmtBRL(l.valor)}</div>
         <button class="btn-edit" onclick="abrirEdicao('${escHtml(String(l.id))}')" aria-label="Editar">
           <i class="ti ti-pencil" aria-hidden="true"></i>
+        </button>
+        <button class="btn-copy" onclick="duplicar('${escHtml(String(l.id))}')" aria-label="Duplicar">
+          <i class="ti ti-copy" aria-hidden="true"></i>
         </button>
         <button class="btn-del" onclick="deletar('${escHtml(String(l.id))}',this)" aria-label="Remover">
           <i class="ti ti-trash" aria-hidden="true"></i>
