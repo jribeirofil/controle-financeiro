@@ -781,3 +781,16 @@ function irPagina(p) {
 }
 
 function setItensPorPagina(val) { itensPorPagina=parseInt(val); paginaAtual=1; renderHistorico(); }
+
+// ── Expor funções para o HTML (necessário com type="module") ──────────────────
+Object.assign(window, {
+  loginGoogle, sair,
+  mostrarCriarFamilia, mostrarEntrarFamilia, criarFamilia, entrarFamilia,
+  abrirConfig, fecharConfig, copiarCodigo, salvarTodosLimites,
+  setCatTipo, adicionarCategoria, removerCategoria, adicionarSubcat, removerSubcat,
+  irPara, setTipo, setParaQuem, setFiltro, setFiltroMes, atualizarSubcat,
+  lancar, fecharEdicao, abrirEdicao, duplicar,
+  deletar, fecharModal, confirmarExclusao,
+  renderResumo, carregarDados,
+  irPagina, setItensPorPagina,
+});
