@@ -8,7 +8,7 @@ import { getFirestore, doc, collection, addDoc, updateDoc, deleteDoc,
 // ── Firebase config ───────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey:            "AIzaSyD4XUN5Pem5H-QN6N-xjLPkcAc44cgLXbU",
-  authDomain:        "controledin-46b48.firebaseapp.com",
+  authDomain:        "controledin.com.br",
   projectId:         "controledin-46b48",
   storageBucket:     "controledin-46b48.firebasestorage.app",
   messagingSenderId: "754312821887",
