@@ -1,4 +1,4 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-BVRrUe8L9V9AC_3RCuCmMFuh_Zs6afaurlcWYjdevWXzd-OWxmy6eOGWQ0detEIJ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlY2uN4ZEH0120S3iDTsIQx0j5ycsFM4SPSUvCB6PwAfoY9o615ecJIt9_KFALpEdy/exec';
 
 // ── Membros da família ────────────────────────────────────────────────────────
 const ADULTOS  = ['Jayme', 'Rita'];
@@ -343,7 +343,12 @@ function renderHistorico() {
     const icone  = ICONES[l.cat] || 'ti-circle';
     let dataFmt  = '';
     if (l.data) {
-      try { dataFmt = new Date(l.data+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}); } catch(e){}
+      try {
+        const partes = String(l.data).substring(0,10).split('-');
+        if (partes.length === 3) {
+          dataFmt = new Date(partes[0], partes[1]-1, partes[2]).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+        }
+      } catch(e){}
     }
     const paraQuem = l.paraQuem || l.resp || '';
     const porQuem  = l.registradoPor ? ' · por ' + l.registradoPor : '';

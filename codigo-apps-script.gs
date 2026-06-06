@@ -48,8 +48,8 @@ function getSheet() {
 
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    const header = sheet.getRange(1, 1, 1, 8);
-    header.setValues([['ID', 'Data', 'Tipo', 'Categoria', 'Subcategoria', 'Descricao', 'Valor', 'Responsavel']]);
+    const header = sheet.getRange(1, 1, 1, 9);
+    header.setValues([['ID', 'Data', 'Tipo', 'Categoria', 'Subcategoria', 'Descricao', 'Valor', 'Para Quem', 'Registrado Por']]);
     header.setBackground('#1F3864');
     header.setFontColor('#FFFFFF');
     header.setFontWeight('bold');
@@ -99,7 +99,8 @@ function adicionar(lanc) {
     lanc.subcat || '',
     lanc.desc || lanc.cat,
     lanc.valor,
-    lanc.resp || 'Casal'
+    lanc.paraQuem || 'Família',
+    lanc.registradoPor || '',
   ]);
 
   return { sucesso: true, id: id };
