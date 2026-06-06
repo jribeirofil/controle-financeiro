@@ -178,6 +178,18 @@
 
   </div>
 
+  <!-- MODAL CONFIRMAÇÃO EXCLUSÃO -->
+  <div class="modal-overlay" id="modal-exclusao">
+    <div class="modal-card">
+      <p class="modal-titulo">Remover lançamento</p>
+      <p class="modal-desc">Essa ação não pode ser desfeita.</p>
+      <div class="modal-acoes">
+        <button class="modal-btn" onclick="fecharModal()">Cancelar</button>
+        <button class="modal-btn confirmar" id="modal-btn-confirmar">Remover</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>

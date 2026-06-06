@@ -194,6 +194,12 @@ function irPara(id, btn) {
   document.getElementById('sec-' + id).classList.add('active');
   if (id === 'resumo')    renderResumo();
   if (id === 'historico') renderHistorico();
+  if (id === 'lancar') {
+    setTimeout(() => {
+      const campoValor = document.getElementById('valor');
+      if (campoValor && !editandoId) campoValor.focus();
+    }, 150);
+  }
 }
 
 // ── Tipo / Para quem / Filtros ────────────────────────────────────────────────
@@ -290,7 +296,14 @@ async function lancar() {
       else lancamentos.unshift(lanc);
       if (scriptConfigurado()) lancamentos.unshift(lanc);
       limparFormulario();
+      // Fecha teclado no celular
+      document.activeElement && document.activeElement.blur();
       mostrarToast('Lançamento salvo!', 'sucesso');
+      // Destaca item novo no histórico após renderizar
+      setTimeout(() => {
+        const primeiro = document.querySelector('.lanc-item');
+        if (primeiro) primeiro.classList.add('novo');
+      }, 100);
 
       // Alerta de limite após novo lançamento
       verificarAlerteLimite(cat, data);
@@ -333,6 +346,12 @@ function limparFormulario() {
     if (b.dataset.nome === 'Família') b.classList.add('active');
   });
   document.getElementById('data').value = new Date().toISOString().split('T')[0];
+  // Scroll para o topo e foco no campo valor
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => {
+    const campoValor = document.getElementById('valor');
+    if (campoValor) campoValor.focus();
+  }, 300);
 }
 
 function abrirEdicao(id) {
@@ -377,18 +396,35 @@ function fecharEdicao() {
   setTipoSilencioso('despesa');
 }
 
-// ── Deletar ───────────────────────────────────────────────────────────────────
-async function deletar(id, btn) {
-  if (!confirm('Remover este lançamento?')) return;
-  btn.disabled = true;
+// ── Modal de exclusão ────────────────────────────────────────────────────────
+let _deletarId   = null;
+let _deletarBtn  = null;
+
+function deletar(id, btn) {
+  _deletarId  = id;
+  _deletarBtn = btn;
+  document.getElementById('modal-exclusao').classList.add('active');
+  document.getElementById('modal-btn-confirmar').onclick = confirmarExclusao;
+}
+
+function fecharModal() {
+  document.getElementById('modal-exclusao').classList.remove('active');
+  _deletarId  = null;
+  _deletarBtn = null;
+}
+
+async function confirmarExclusao() {
+  fecharModal();
+  if (!_deletarId) return;
+  if (_deletarBtn) _deletarBtn.disabled = true;
   try {
-    if (scriptConfigurado()) await apiDeletar(id);
-    lancamentos = lancamentos.filter(l => l.id !== id);
+    if (scriptConfigurado()) await apiDeletar(_deletarId);
+    lancamentos = lancamentos.filter(l => l.id !== _deletarId);
     renderHistorico(); renderResumo();
     mostrarToast('Removido', 'sucesso');
   } catch (e) {
     mostrarToast('Erro ao remover', 'erro');
-    btn.disabled = false;
+    if (_deletarBtn) _deletarBtn.disabled = false;
   }
 }
 

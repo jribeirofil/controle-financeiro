@@ -79,6 +79,7 @@ body {
 .tab-bar {
   display: flex; background: var(--superficie);
   border-bottom: 0.5px solid var(--borda); padding: 0 1rem;
+  position: sticky; top: 57px; z-index: 9;
 }
 .tab {
   flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -405,3 +406,34 @@ body {
 .limite-pct.aviso  { background: var(--amar-claro, #FFF3CD); color: #7A5C00; }
 .limite-pct.alerta { background: var(--verm-claro);  color: var(--verm-texto);  }
 .barra-fill.aviso  { background: #F0A500; }
+
+/* ── Modal de confirmação ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.5);
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-card {
+  background: var(--superficie); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem 1.25rem; width: 100%; max-width: 480px;
+}
+.modal-titulo { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.modal-desc   { font-size: 14px; color: var(--texto-sec); margin-bottom: 1.25rem; }
+.modal-acoes  { display: flex; gap: 10px; }
+.modal-btn {
+  flex: 1; padding: 13px; border-radius: var(--radius-md);
+  font-family: var(--fonte); font-size: 15px; font-weight: 500;
+  cursor: pointer; border: 0.5px solid var(--borda-forte);
+  background: var(--superficie); color: var(--texto); transition: all 0.15s;
+}
+.modal-btn.confirmar {
+  background: var(--verm); color: #fff; border-color: var(--verm);
+}
+
+/* ── Destaque item novo ── */
+@keyframes highlight-new {
+  0%   { background: var(--verde-claro); }
+  100% { background: var(--superficie); }
+}
+.lanc-item.novo { animation: highlight-new 1.8s ease-out forwards; }
